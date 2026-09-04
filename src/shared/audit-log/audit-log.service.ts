@@ -15,6 +15,19 @@ export interface RegistrarAuditoriaInput {
   newValue?: unknown;
 }
 
+// UC-CFG-04 — forma de fila para consultas de solo lectura sobre audit_log.
+export interface AuditLogRow {
+  id: string;
+  organization_id: string;
+  actor_user_id: string;
+  entity_type: string;
+  entity_id: string;
+  field_changed: string | null;
+  old_value: unknown;
+  new_value: unknown;
+  occurred_at: string;
+}
+
 @Injectable()
 export class AuditLogService {
   // Recibe el `client` de la transacción en curso (de DatabaseService.withTenant) — nunca abre
