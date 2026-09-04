@@ -133,4 +133,50 @@ describe('FinancialDimensionsService', () => {
       expect(auditLog.record).toHaveBeenCalledOnce();
     });
   });
+
+  describe('obtenerPorId', () => {
+    it('regresa null si no existe — para que consumidores de otros dominios (UC-PAY-05) puedan decidir sin lanzar', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from financial_dimension where id/i, rows: [] }]));
+      const service = new FinancialDimensionsService(db as never, auditLog as never);
+
+      const resultado = await service.obtenerPorId(ORG_ID, 'no-existe');
+
+      expect(resultado).toBeNull();
+    });
+
+    it('regresa la dimensión si existe', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from financial_dimension where id/i, rows: [{ id: 'dim-1', is_qualifying_for_block: true }] }]));
+      const service = new FinancialDimensionsService(db as never, auditLog as never);
+
+      const resultado = await service.obtenerPorId(ORG_ID, 'dim-1');
+
+      expect(resultado?.is_qualifying_for_block).toBe(true);
+    });
+  });
+
+  describe('actualizarQualifyingForBlock', () => {
+    it('lanza NotFoundException si la dimensión no existe', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from financial_dimension where id/i, rows: [] }]));
+      const service = new FinancialDimensionsService(db as never, auditLog as never);
+
+      await expect(
+        service.actualizarQualifyingForBlock({ organizationId: ORG_ID, actorUserId: ACTOR_ID, dimensionId: 'no-existe', isQualifyingForBlock: true }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('actualiza la bandera y lo audita — UC-PAY-05 depende de este valor para bloquear convocatoria', async () => {
+      const anterior = { id: 'dim-1', is_qualifying_for_block: false };
+      const stubs: QueryStub[] = [
+        { matcher: /select \* from financial_dimension where id/i, rows: [anterior] },
+        { matcher: /update financial_dimension set is_qualifying_for_block/i, rows: [{ ...anterior, is_qualifying_for_block: true }] },
+      ];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new FinancialDimensionsService(db as never, auditLog as never);
+
+      const resultado = await service.actualizarQualifyingForBlock({ organizationId: ORG_ID, actorUserId: ACTOR_ID, dimensionId: 'dim-1', isQualifyingForBlock: true });
+
+      expect(resultado.is_qualifying_for_block).toBe(true);
+      expect(auditLog.record).toHaveBeenCalledOnce();
+    });
+  });
 });

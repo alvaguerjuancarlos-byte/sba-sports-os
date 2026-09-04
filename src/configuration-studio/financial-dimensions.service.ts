@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../db/database.service.js';
 import { AuditLogService } from '../shared/audit-log/audit-log.service.js';
 import { archivarDimensionEnTransaccion, crearDimensionEnTransaccion } from './configuration-studio.operations.js';
@@ -16,6 +16,13 @@ export interface ArchivarDimensionInput {
   organizationId: string;
   actorUserId: string;
   dimensionId: string;
+}
+
+export interface ActualizarQualifyingForBlockInput {
+  organizationId: string;
+  actorUserId: string;
+  dimensionId: string;
+  isQualifyingForBlock: boolean;
 }
 
 // UC-CFG-01 — Crear/editar/archivar dimensión financiera.
@@ -75,6 +82,47 @@ export class FinancialDimensionsService {
       }
       const { rows } = await client.query<FinancialDimensionRow>(`select * from financial_dimension order by type, name`);
       return rows;
+    });
+  }
+
+  // Lectura por id para consumidores de otros dominios (ej. Payments & Billing, UC-PAY-05) — así
+  // ese dominio nunca hace SELECT directo contra la tabla de este, siempre vía este servicio.
+  async obtenerPorId(organizationId: string, dimensionId: string): Promise<FinancialDimensionRow | null> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<FinancialDimensionRow>(`select * from financial_dimension where id = $1`, [
+        dimensionId,
+      ]);
+      return rows[0] ?? null;
+    });
+  }
+
+  // UC-PAY-05 depende de esta bandera para saber qué tipo de cargo vencido bloquea convocatoria —
+  // no forma parte de UC-CFG-01..04, se agrega aquí porque Configuration Studio es quien la posee
+  // y la expone (ver db/migrations/0004_payments_billing_init.sql).
+  async actualizarQualifyingForBlock(input: ActualizarQualifyingForBlockInput): Promise<FinancialDimensionRow> {
+    return this.db.withTenant(input.organizationId, async (client) => {
+      const { rows } = await client.query<FinancialDimensionRow>(`select * from financial_dimension where id = $1`, [
+        input.dimensionId,
+      ]);
+      const anterior = rows[0];
+      if (!anterior) throw new NotFoundException('financial_dimension no encontrada.');
+
+      const { rows: updated } = await client.query<FinancialDimensionRow>(
+        `update financial_dimension set is_qualifying_for_block = $2 where id = $1 returning *`,
+        [input.dimensionId, input.isQualifyingForBlock],
+      );
+
+      await this.auditLog.record(client, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        entityType: 'financial_dimension',
+        entityId: anterior.id,
+        fieldChanged: 'is_qualifying_for_block',
+        oldValue: { isQualifyingForBlock: anterior.is_qualifying_for_block },
+        newValue: { isQualifyingForBlock: input.isQualifyingForBlock },
+      });
+
+      return updated[0];
     });
   }
 }

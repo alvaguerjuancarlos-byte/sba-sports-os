@@ -88,4 +88,14 @@ export class ProductCatalogService {
       return rows;
     });
   }
+
+  // Lectura por id para consumidores de otros dominios (ej. Payments & Billing, UC-PAY-01/02
+  // necesitan copiar nombre/precio del producto al crear un membership_plan o invoice) — así ese
+  // dominio nunca hace SELECT directo contra la tabla de este, siempre vía este servicio.
+  async obtenerPorId(organizationId: string, id: string): Promise<ProductCatalogRow | null> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<ProductCatalogRow>(`select * from product_catalog where id = $1`, [id]);
+      return rows[0] ?? null;
+    });
+  }
 }

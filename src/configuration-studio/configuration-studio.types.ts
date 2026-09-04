@@ -10,6 +10,10 @@ export interface FinancialDimensionRow {
   name: string;
   parent_id: string | null;
   status: CfgStatus;
+  // [propuesto] agregado en db/migrations/0004_payments_billing_init.sql, no en la migración
+  // original de este dominio — UC-CFG-01..04 no lo necesitaban; UC-PAY-05 (Payments & Billing) es
+  // el primer y único consumidor: clasifica qué tipo de cargo vencido bloquea convocatoria.
+  is_qualifying_for_block: boolean;
   created_at: string;
   updated_at: string;
 }

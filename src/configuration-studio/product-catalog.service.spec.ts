@@ -154,4 +154,24 @@ describe('ProductCatalogService', () => {
       expect(resultado).toHaveLength(1);
     });
   });
+
+  describe('obtenerPorId', () => {
+    it('regresa null si no existe — para que consumidores de otros dominios (Payments & Billing) puedan decidir sin lanzar', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from product_catalog where id/i, rows: [] }]));
+      const service = new ProductCatalogService(db as never, auditLog as never);
+
+      const resultado = await service.obtenerPorId(ORG_ID, 'no-existe');
+
+      expect(resultado).toBeNull();
+    });
+
+    it('regresa el producto si existe', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from product_catalog where id/i, rows: [{ id: 'prod-1', name: 'Mensualidad', price: '1000.00' }] }]));
+      const service = new ProductCatalogService(db as never, auditLog as never);
+
+      const resultado = await service.obtenerPorId(ORG_ID, 'prod-1');
+
+      expect(resultado?.name).toBe('Mensualidad');
+    });
+  });
 });

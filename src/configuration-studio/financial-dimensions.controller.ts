@@ -42,4 +42,20 @@ export class FinancialDimensionsController {
   listar(@CurrentUser() actor: AuthenticatedUser, @Query('status') status?: CfgStatus) {
     return this.financialDimensionsService.listar(actor.organizationId, { status });
   }
+
+  // UC-PAY-05 — marca qué tipo de cargo vencido bloquea convocatoria. No es parte de UC-CFG-01..04
+  // pero vive aquí porque Configuration Studio es dueño de financial_dimension.
+  @Post(':id/qualifying-for-block')
+  actualizarQualifyingForBlock(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: { isQualifyingForBlock: boolean },
+  ) {
+    return this.financialDimensionsService.actualizarQualifyingForBlock({
+      organizationId: actor.organizationId,
+      actorUserId: actor.userId,
+      dimensionId: id,
+      isQualifyingForBlock: body.isQualifyingForBlock,
+    });
+  }
 }

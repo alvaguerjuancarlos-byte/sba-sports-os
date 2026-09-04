@@ -5,9 +5,10 @@ import { DatabaseModule } from './db/database.module.js';
 import { IdentityAccessModule } from './identity-access/identity-access.module.js';
 import { ConfigurationStudioModule } from './configuration-studio/configuration-studio.module.js';
 import { AdminHubModule } from './admin-hub/admin-hub.module.js';
+import { PaymentsBillingModule } from './payments-billing/payments-billing.module.js';
 
 @Module({
-  imports: [DatabaseModule, IdentityAccessModule, ConfigurationStudioModule, AdminHubModule],
+  imports: [DatabaseModule, IdentityAccessModule, ConfigurationStudioModule, AdminHubModule, PaymentsBillingModule],
   controllers: [AppController],
   providers: [AppService],
 })
