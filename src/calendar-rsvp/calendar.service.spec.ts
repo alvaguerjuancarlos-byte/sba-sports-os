@@ -17,11 +17,17 @@ function guardianServiceFalso(atletasPorTutor: Record<string, string[]>) {
   };
 }
 
-function clientConEventosYConteo(eventos: Record<string, unknown>[], miAttendance: Record<string, unknown>[] = [], conteo: Record<string, unknown>[] = []) {
+function clientConEventosYConteo(
+  eventos: Record<string, unknown>[],
+  miAttendance: Record<string, unknown>[] = [],
+  conteo: Record<string, unknown>[] = [],
+  attendancesDeHijos: Record<string, unknown>[] = [],
+) {
   const query = vi.fn((sql: string) => {
     if (/select \* from event order by start_at$/i.test(sql)) return Promise.resolve({ rows: eventos });
     if (/select \* from event where team_id = any/i.test(sql)) return Promise.resolve({ rows: eventos });
     if (/select \* from attendance where event_id = \$1 and user_id = \$2/i.test(sql)) return Promise.resolve({ rows: miAttendance });
+    if (/select \* from attendance where event_id = \$1 and user_id = any/i.test(sql)) return Promise.resolve({ rows: attendancesDeHijos });
     if (/select status, count\(\*\)/i.test(sql)) return Promise.resolve({ rows: conteo });
     throw new Error(`Query sin stub configurado: ${sql}`);
   });
@@ -59,10 +65,11 @@ describe('CalendarService', () => {
     expect(resultado[0].confirmados).toBe(0);
   });
 
-  it('familia (parent) ve los eventos agregados de los equipos de todos sus hijos', async () => {
+  it('familia (parent) ve los eventos agregados de los equipos de todos sus hijos, con el RSVP de cada hijo (no el suyo propio)', async () => {
     const guardian = guardianServiceFalso({ 'tutor-1': ['hijo-1', 'hijo-2'] });
     const roster = rosterServiceFalso({ 'hijo-1': ['team-A'], 'hijo-2': ['team-B'] });
-    const client = clientConEventosYConteo([{ id: 'event-A' }, { id: 'event-B' }]);
+    const attendancesDeHijos = [{ id: 'attendance-hijo-1', user_id: 'hijo-1', status: 'pending' }];
+    const client = clientConEventosYConteo([{ id: 'event-A' }, { id: 'event-B' }], [], [], attendancesDeHijos);
     const db = crearDbFalsa(client);
     const service = new CalendarService(db as never, roster as never, guardian as never);
 
@@ -70,13 +77,14 @@ describe('CalendarService', () => {
 
     expect(guardian.listarAtletasDeGuardian).toHaveBeenCalledWith(ORG_ID, 'tutor-1');
     expect(resultado).toHaveLength(2);
+    expect(resultado[0].attendancesDeHijos).toEqual([{ attendanceId: 'attendance-hijo-1', athleteUserId: 'hijo-1', status: 'pending' }]);
     // player/parent view no incluye conteo agregado
     expect(resultado[0].confirmados).toBeUndefined();
   });
 
   it('un jugador ve solo los eventos de sus propios equipos, sin conteo agregado, con su propio RSVP', async () => {
     const roster = rosterServiceFalso({ 'jugador-1': ['team-A'] });
-    const miAttendance = [{ status: 'confirmed' }];
+    const miAttendance = [{ id: 'attendance-1', status: 'confirmed' }];
     const client = clientConEventosYConteo([{ id: 'event-1' }], miAttendance);
     const db = crearDbFalsa(client);
     const service = new CalendarService(db as never, roster as never, guardianServiceFalso({}) as never);
@@ -84,6 +92,7 @@ describe('CalendarService', () => {
     const resultado = await service.consultar({ organizationId: ORG_ID, actorUserId: 'jugador-1', actorRoles: ['player'] });
 
     expect(resultado[0].miRsvp).toBe('confirmed');
+    expect(resultado[0].miAttendanceId).toBe('attendance-1');
     expect(resultado[0].confirmados).toBeUndefined();
   });
 

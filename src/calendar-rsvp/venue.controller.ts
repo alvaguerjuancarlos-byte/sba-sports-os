@@ -25,7 +25,11 @@ export class VenueController {
     return this.venueService.archivar({ organizationId: actor.organizationId, actorUserId: actor.userId, venueId: id });
   }
 
+  // Lectura abierta a cualquier rol autenticado — el nombre de una sede no es dato restringido;
+  // el calendario (UC-CAL-04) lo necesita para mostrarle a cualquier familia/jugador dónde es
+  // su evento.
   @Get()
+  @Roles('player', 'coach', 'admin', 'parent', 'director')
   listar(@CurrentUser() actor: AuthenticatedUser, @Query('status') status?: VenueStatus) {
     return this.venueService.listar(actor.organizationId, { status });
   }

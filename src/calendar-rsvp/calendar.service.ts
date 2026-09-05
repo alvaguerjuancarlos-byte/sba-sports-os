@@ -10,8 +10,20 @@ export interface ConsultarCalendarioInput {
   actorRoles: string[];
 }
 
+export interface AttendanceDeHijo {
+  attendanceId: string;
+  athleteUserId: string;
+  status: RsvpStatus;
+}
+
 export interface EventoDeCalendario extends EventRow {
   miRsvp: RsvpStatus | null;
+  // id del propio attendance — necesario para el frontend, POST /calendar-rsvp/attendance/:id/respond
+  // toma el id de la fila, no el event_id.
+  miAttendanceId: string | null;
+  // Solo presente para 'parent' — el attendance pertenece al hijo (user_id = atleta), nunca al
+  // tutor, así que "mi" RSVP no existe para ese rol; esto es lo que el tutor puede responder.
+  attendancesDeHijos?: AttendanceDeHijo[];
   // Solo presentes para coach/admin/director — "para el coach, el conteo agregado de
   // confirmados/declinados/pendientes por evento."
   confirmados?: number;
@@ -37,11 +49,12 @@ export class CalendarService {
 
     // null = sin filtro de equipo ("admin ve la organización completa").
     let teamIds: string[] | null = null;
+    let atletas: string[] = [];
     if (!esStaff) {
       if (esCoach) {
         teamIds = await this.rosterService.listarEquiposDeUsuario(input.organizationId, input.actorUserId, { role: 'coach' });
       } else if (esParent) {
-        const atletas = await this.guardianConsentService.listarAtletasDeGuardian(input.organizationId, input.actorUserId);
+        atletas = await this.guardianConsentService.listarAtletasDeGuardian(input.organizationId, input.actorUserId);
         const porAtleta = await Promise.all(
           atletas.map((atletaId) => this.rosterService.listarEquiposDeUsuario(input.organizationId, atletaId)),
         );
@@ -76,7 +89,15 @@ export class CalendarService {
           `select * from attendance where event_id = $1 and user_id = $2`,
           [evento.id, input.actorUserId],
         );
-        const item: EventoDeCalendario = { ...evento, miRsvp: miAttendance[0]?.status ?? null };
+        const item: EventoDeCalendario = { ...evento, miRsvp: miAttendance[0]?.status ?? null, miAttendanceId: miAttendance[0]?.id ?? null };
+
+        if (esParent && atletas.length > 0) {
+          const { rows: attendancesDeHijos } = await client.query<AttendanceRow>(
+            `select * from attendance where event_id = $1 and user_id = any($2::uuid[])`,
+            [evento.id, atletas],
+          );
+          item.attendancesDeHijos = attendancesDeHijos.map((a) => ({ attendanceId: a.id, athleteUserId: a.user_id, status: a.status }));
+        }
 
         if (esStaff || esCoach) {
           const { rows: conteo } = await client.query<{ status: RsvpStatus; total: string }>(

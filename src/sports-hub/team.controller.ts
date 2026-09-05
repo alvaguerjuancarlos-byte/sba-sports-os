@@ -35,7 +35,11 @@ export class TeamController {
     return this.teamService.archivar({ organizationId: actor.organizationId, actorUserId: actor.userId, teamId: id });
   }
 
+  // Lectura abierta a cualquier rol autenticado (mismo criterio que UC-SPT-05/standings) — nombre,
+  // categoría y deporte de un equipo no son datos restringidos; el calendario (UC-CAL-04) los
+  // necesita para mostrarle a cualquier familia/jugador el nombre de su propio equipo.
   @Get()
+  @Roles('player', 'coach', 'admin', 'parent', 'director')
   listar(@CurrentUser() actor: AuthenticatedUser, @Query('seasonId') seasonId?: string, @Query('status') status?: TeamStatus) {
     return this.teamService.listar(actor.organizationId, { seasonId, status });
   }
