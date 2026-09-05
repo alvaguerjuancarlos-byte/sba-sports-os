@@ -1,5 +1,6 @@
 import { NotFoundException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../db/database.service.js';
+import { GuardianConsentService } from '../identity-access/guardian-consent.service.js';
 import { redactarComentarioSiNoTieneScope } from './callup-engine.types.js';
 import type { CallupListRow, CallupSlotRow, CallupWaiverRedactado, CallupWaiverRow } from './callup-engine.types.js';
 
@@ -24,9 +25,19 @@ export interface ConsultarConvocatoriaResultado {
 // vista de familia/jugador."
 @Injectable()
 export class CallupQueryService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly guardianConsentService: GuardianConsentService,
+  ) {}
 
   async consultarPorEvento(input: ConsultarConvocatoriaInput): Promise<ConsultarConvocatoriaResultado> {
+    // "Familia... consulta su propio estado" — el slot pertenece al atleta (user_id), nunca al
+    // tutor, así que un padre necesita el mismo puente que ya existe en Calendar & RSVP
+    // (attendancesDeHijos) y en la respuesta de convocatoria (CallupResponseService) para poder ver
+    // y luego responder el cupo de su hijo.
+    const esParent = input.actorRoles.includes('parent');
+    const atletas = esParent ? await this.guardianConsentService.listarAtletasDeGuardian(input.organizationId, input.actorUserId) : [];
+
     return this.db.withTenant(input.organizationId, async (client) => {
       const { rows: listaRows } = await client.query<CallupListRow>(`select * from callup_list where event_id = $1`, [
         input.eventId,
@@ -40,9 +51,11 @@ export class CallupQueryService {
       );
 
       // "Coach consulta la lista completa" — coach/admin/director ven todo; familia/jugador solo
-      // su propio slot.
+      // su propio slot (o el de sus hijos, si es tutor).
       const esStaff = input.actorRoles.some((rol) => rol === 'admin' || rol === 'director' || rol === 'coach');
-      const slotsVisibles = esStaff ? todosLosSlots : todosLosSlots.filter((slot) => slot.user_id === input.actorUserId);
+      const slotsVisibles = esStaff
+        ? todosLosSlots
+        : todosLosSlots.filter((slot) => slot.user_id === input.actorUserId || atletas.includes(slot.user_id));
 
       const slots: CallupSlotConWaivers[] = [];
       for (const slot of slotsVisibles) {

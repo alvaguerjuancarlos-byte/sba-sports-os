@@ -108,4 +108,16 @@ describe('MatchLineupService', () => {
       expect(resultado.opponent_score).toBe(0);
     });
   });
+
+  describe('listarPorEvento', () => {
+    it('regresa los match_lineup del evento', async () => {
+      const stubs: QueryStub[] = [{ matcher: /select \* from match_lineup where event_id/i, rows: [{ id: 'lineup-1' }] }];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new MatchLineupService(db as never, eventServiceFalso(null) as never, callupListServiceFalso(null) as never);
+
+      const resultado = await service.listarPorEvento(ORG_ID, EVENT_ID);
+
+      expect(resultado).toHaveLength(1);
+    });
+  });
 });

@@ -30,10 +30,22 @@ interface AsignarRolBody {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // Lectura para el frontend — listado de administración de la organización.
+  // Lectura para el frontend — listado de administración de la organización (incluye
+  // email/teléfono/fecha de nacimiento, por eso queda en admin/director).
   @Get()
   listar(@CurrentUser() actor: AuthenticatedUser) {
     return this.usersService.listarUsuariosDeOrganizacion(actor.organizationId);
+  }
+
+  // Directorio redactado (solo nombre/rol/status, sin email/teléfono/fecha de nacimiento) para
+  // pantallas donde coach necesita resolver nombres o elegir candidatos (roster, check-ins,
+  // checkouts, convocatoria, centro de partido) sin exponerle el PII completo de la organización
+  // que sí ve admin/director en el listado de arriba.
+  @Get('directory')
+  @Roles('admin', 'director', 'coach')
+  async directorio(@CurrentUser() actor: AuthenticatedUser) {
+    const usuarios = await this.usersService.listarUsuariosDeOrganizacion(actor.organizationId);
+    return usuarios.map((u) => ({ user_id: u.user_id, full_name: u.full_name, role: u.role, status: u.status }));
   }
 
   // UC-ID-01

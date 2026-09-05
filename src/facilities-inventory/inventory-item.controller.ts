@@ -34,7 +34,10 @@ export class InventoryItemController {
     return this.inventoryItemService.archivar({ organizationId: actor.organizationId, actorUserId: actor.userId, inventoryItemId: id });
   }
 
+  // Lectura abierta también a coach (UC-FAC-02: "coach o staff con permiso de check-out" necesita
+  // ver el catálogo para elegir qué retirar, aunque solo admin/director pueda crear/archivar).
   @Get()
+  @Roles('admin', 'director', 'coach')
   listar(@CurrentUser() actor: AuthenticatedUser, @Query('venueId') venueId?: string, @Query('status') status?: InventoryItemStatus) {
     return this.inventoryItemService.listar(actor.organizationId, { venueId, status });
   }

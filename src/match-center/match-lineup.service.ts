@@ -90,6 +90,17 @@ export class MatchLineupService {
     });
   }
 
+  // Lectura para el frontend — sin esto no hay forma de saber quién está activo en la cancha para
+  // construir el formulario de un match_event (gol/sustitución/tarjeta necesita playerLineupId).
+  async listarPorEvento(organizationId: string, eventId: string): Promise<MatchLineupRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<MatchLineupRow>(`select * from match_lineup where event_id = $1 order by is_starter desc, created_at`, [
+        eventId,
+      ]);
+      return rows;
+    });
+  }
+
   private esViolacionDeUnicidad(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23505';
   }

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
@@ -27,5 +27,13 @@ export class MatchLineupController {
   @Post('start')
   iniciarPartido(@CurrentUser() actor: AuthenticatedUser, @Param('eventId') eventId: string) {
     return this.matchLineupService.iniciarPartido({ organizationId: actor.organizationId, actorUserId: actor.userId, eventId });
+  }
+
+  // Lectura abierta a cualquier rol autenticado (mismo criterio que UC-MAT-04/05) — quién está en
+  // la alineación no es dato restringido.
+  @Get('lineup')
+  @Roles('player', 'coach', 'admin', 'parent', 'director')
+  listar(@CurrentUser() actor: AuthenticatedUser, @Param('eventId') eventId: string) {
+    return this.matchLineupService.listarPorEvento(actor.organizationId, eventId);
   }
 }

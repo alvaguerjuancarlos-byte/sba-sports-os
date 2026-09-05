@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { NotFoundException } from '@nestjs/common';
 import { CallupQueryService } from './callup-query.service.js';
 import { crearClientFalso, crearDbFalsa } from './test-helpers.js';
@@ -8,11 +8,17 @@ const ORG_ID = 'org-1';
 const EVENT_ID = 'event-1';
 const LIST_ID = 'list-1';
 
+function guardianServiceFalso(atletasPorTutor: Record<string, string[]> = {}) {
+  return {
+    listarAtletasDeGuardian: vi.fn((_org: string, guardianId: string) => Promise.resolve(atletasPorTutor[guardianId] ?? [])),
+  };
+}
+
 // UC-CUP-05 — un test por criterio de aceptación textual.
 describe('CallupQueryService', () => {
   it('lanza NotFoundException si no existe convocatoria para el evento', async () => {
     const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from callup_list where event_id/i, rows: [] }]));
-    const service = new CallupQueryService(db as never);
+    const service = new CallupQueryService(db as never, guardianServiceFalso() as never);
 
     await expect(
       service.consultarPorEvento({ organizationId: ORG_ID, eventId: 'no-existe', actorUserId: 'user-1', actorRoles: ['player'] }),
@@ -27,7 +33,7 @@ describe('CallupQueryService', () => {
       { matcher: /select \* from callup_waiver where callup_slot_id/i, rows: [] },
     ];
     const db = crearDbFalsa(crearClientFalso(stubs));
-    const service = new CallupQueryService(db as never);
+    const service = new CallupQueryService(db as never, guardianServiceFalso() as never);
 
     const resultado = await service.consultarPorEvento({ organizationId: ORG_ID, eventId: EVENT_ID, actorUserId: 'coach-1', actorRoles: ['coach'] });
 
@@ -42,12 +48,30 @@ describe('CallupQueryService', () => {
       { matcher: /select \* from callup_waiver where callup_slot_id/i, rows: [] },
     ];
     const db = crearDbFalsa(crearClientFalso(stubs));
-    const service = new CallupQueryService(db as never);
+    const service = new CallupQueryService(db as never, guardianServiceFalso() as never);
 
     const resultado = await service.consultarPorEvento({ organizationId: ORG_ID, eventId: EVENT_ID, actorUserId: 'jugador-1', actorRoles: ['player'] });
 
     expect(resultado.slots).toHaveLength(1);
     expect(resultado.slots[0].user_id).toBe('jugador-1');
+  });
+
+  it('un tutor (parent) ve el slot de su hijo, aunque no coincida con su propio actorUserId', async () => {
+    const slots = [{ id: 'slot-1', user_id: 'hijo-1' }, { id: 'slot-2', user_id: 'jugador-2' }];
+    const stubs: QueryStub[] = [
+      { matcher: /select \* from callup_list where event_id/i, rows: [{ id: LIST_ID, event_id: EVENT_ID }] },
+      { matcher: /select \* from callup_slot where callup_list_id/i, rows: slots },
+      { matcher: /select \* from callup_waiver where callup_slot_id/i, rows: [] },
+    ];
+    const db = crearDbFalsa(crearClientFalso(stubs));
+    const guardian = guardianServiceFalso({ 'tutor-1': ['hijo-1'] });
+    const service = new CallupQueryService(db as never, guardian as never);
+
+    const resultado = await service.consultarPorEvento({ organizationId: ORG_ID, eventId: EVENT_ID, actorUserId: 'tutor-1', actorRoles: ['parent'] });
+
+    expect(guardian.listarAtletasDeGuardian).toHaveBeenCalledWith(ORG_ID, 'tutor-1');
+    expect(resultado.slots).toHaveLength(1);
+    expect(resultado.slots[0].user_id).toBe('hijo-1');
   });
 
   it('el internal_comment de un waiver nunca se expone a la vista de familia/jugador', async () => {
@@ -59,7 +83,7 @@ describe('CallupQueryService', () => {
       { matcher: /select \* from callup_waiver where callup_slot_id/i, rows: waivers },
     ];
     const db = crearDbFalsa(crearClientFalso(stubs));
-    const service = new CallupQueryService(db as never);
+    const service = new CallupQueryService(db as never, guardianServiceFalso() as never);
 
     const resultado = await service.consultarPorEvento({ organizationId: ORG_ID, eventId: EVENT_ID, actorUserId: 'jugador-1', actorRoles: ['player'] });
 
@@ -75,7 +99,7 @@ describe('CallupQueryService', () => {
       { matcher: /select \* from callup_waiver where callup_slot_id/i, rows: waivers },
     ];
     const db = crearDbFalsa(crearClientFalso(stubs));
-    const service = new CallupQueryService(db as never);
+    const service = new CallupQueryService(db as never, guardianServiceFalso() as never);
 
     const resultado = await service.consultarPorEvento({ organizationId: ORG_ID, eventId: EVENT_ID, actorUserId: 'admin-1', actorRoles: ['admin'] });
 
