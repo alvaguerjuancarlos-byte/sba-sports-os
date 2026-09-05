@@ -64,4 +64,10 @@ export class MembershipPlanController {
     const plan = await this.membershipPlanService.obtenerPorId(actor.organizationId, id);
     return redactarBecaSiNoTieneScope(plan, actor.roles);
   }
+
+  @Get()
+  async listar(@CurrentUser() actor: AuthenticatedUser) {
+    const planes = await this.membershipPlanService.listar(actor.organizationId);
+    return planes.map((plan) => redactarBecaSiNoTieneScope(plan, actor.roles));
+  }
 }

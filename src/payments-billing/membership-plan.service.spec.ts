@@ -115,4 +115,16 @@ describe('MembershipPlanService', () => {
       ).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('listar', () => {
+    it('regresa los planes de la organización', async () => {
+      const stubs: QueryStub[] = [{ matcher: /select \* from membership_plan order by created_at desc/i, rows: [{ id: PLAN_ID }] }];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new MembershipPlanService(db as never, auditLog as never, productCatalogFalso(null) as never);
+
+      const resultado = await service.listar(ORG_ID);
+
+      expect(resultado).toHaveLength(1);
+    });
+  });
 });

@@ -73,4 +73,11 @@ export class InvoiceService {
       return invoice;
     });
   }
+
+  async listar(organizationId: string): Promise<InvoiceRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<InvoiceRow>(`select * from invoice order by due_date desc`);
+      return rows;
+    });
+  }
 }

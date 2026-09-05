@@ -1,10 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/jwt.types.js';
 import { InvoiceService } from './invoice.service.js';
+import { calcularEstadoEfectivo } from './payments-billing.types.js';
 
 // UC-PAY-02 — Actor: "Sistema (automático, por ciclo de facturación) o Admin (manual, cargo
 // único)". La generación automática por ciclo requeriría un scheduler llamando directo al
@@ -30,5 +31,12 @@ export class InvoiceController {
       productCatalogId: body.productCatalogId ?? null,
       dueDate: body.dueDate,
     });
+  }
+
+  // Criterio de aceptación UC-PAY-02: "overdue" nunca se almacena, se deriva aquí para la pantalla.
+  @Get()
+  async listar(@CurrentUser() actor: AuthenticatedUser) {
+    const invoices = await this.invoiceService.listar(actor.organizationId);
+    return invoices.map((invoice) => ({ ...invoice, effective_status: calcularEstadoEfectivo(invoice.status, invoice.due_date) }));
   }
 }

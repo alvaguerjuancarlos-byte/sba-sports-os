@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
@@ -48,5 +48,10 @@ export class TransactionController {
       transactionId: id,
       estadoReportadoPorProveedor: body.estadoReportadoPorProveedor,
     });
+  }
+
+  @Get()
+  listar(@CurrentUser() actor: AuthenticatedUser) {
+    return this.transactionService.listar(actor.organizationId);
   }
 }

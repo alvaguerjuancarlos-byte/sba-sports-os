@@ -110,4 +110,11 @@ export class TransactionService {
       return { transaction: updated[0], alertaGenerada: hayDiscrepancia };
     });
   }
+
+  async listar(organizationId: string): Promise<TransactionRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<TransactionRow>(`select * from transaction order by created_at desc`);
+      return rows;
+    });
+  }
 }

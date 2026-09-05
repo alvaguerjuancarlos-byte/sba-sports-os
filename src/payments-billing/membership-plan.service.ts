@@ -153,6 +153,13 @@ export class MembershipPlanService {
     });
   }
 
+  async listar(organizationId: string): Promise<MembershipPlanRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<MembershipPlanRow>(`select * from membership_plan order by created_at desc`);
+      return rows;
+    });
+  }
+
   async obtenerPorId(organizationId: string, membershipPlanId: string): Promise<MembershipPlanRow> {
     return this.db.withTenant(organizationId, async (client) => {
       const { rows } = await client.query<MembershipPlanRow>(`select * from membership_plan where id = $1`, [

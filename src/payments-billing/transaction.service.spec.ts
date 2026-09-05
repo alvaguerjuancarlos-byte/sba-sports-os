@@ -109,4 +109,16 @@ describe('TransactionService', () => {
       expect(auditLog.record).toHaveBeenCalledOnce();
     });
   });
+
+  describe('listar', () => {
+    it('regresa las transactions de la organización', async () => {
+      const stubs: QueryStub[] = [{ matcher: /select \* from transaction order by created_at desc/i, rows: [{ id: 'txn-1' }] }];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new TransactionService(db as never, auditLog as never);
+
+      const resultado = await service.listar(ORG_ID);
+
+      expect(resultado).toHaveLength(1);
+    });
+  });
 });

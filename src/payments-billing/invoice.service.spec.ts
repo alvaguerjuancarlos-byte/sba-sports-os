@@ -82,4 +82,16 @@ describe('InvoiceService', () => {
     const [, params] = (client.query as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(params).toContain('dim-qualifying');
   });
+
+  describe('listar', () => {
+    it('regresa las invoices de la organización', async () => {
+      const stubs: QueryStub[] = [{ matcher: /select \* from invoice order by due_date desc/i, rows: [{ id: 'inv-1' }] }];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new InvoiceService(db as never, auditLog as never, membershipPlanFalso(null) as never, productCatalogFalso(null) as never);
+
+      const resultado = await service.listar(ORG_ID);
+
+      expect(resultado).toHaveLength(1);
+    });
+  });
 });
