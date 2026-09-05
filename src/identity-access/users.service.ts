@@ -190,4 +190,17 @@ export class UsersService {
   private esViolacionDeUnicidad(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23505';
   }
+
+  // Lectura para consumidores de otros dominios (ej. Sports Hub, UC-SPT-03: "ningún
+  // roster_membership existe sin un user_tenant_role activo asociado") — así ese dominio nunca
+  // hace SELECT directo contra user_tenant_role, siempre vía este servicio.
+  async tieneRolActivoEnOrganizacion(organizationId: string, userId: string): Promise<boolean> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query(
+        `select 1 from user_tenant_role where user_id = $1 and status = 'active' limit 1`,
+        [userId],
+      );
+      return rows.length > 0;
+    });
+  }
 }

@@ -251,4 +251,20 @@ describe('UsersService', () => {
       ).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('tieneRolActivoEnOrganizacion', () => {
+    it('regresa true si existe un user_tenant_role activo', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select 1 from user_tenant_role/i, rows: [{ '?column?': 1 }] }]));
+      const service = new UsersService(db as never, auditLog as never);
+
+      await expect(service.tieneRolActivoEnOrganizacion(ORG_ID, 'user-1')).resolves.toBe(true);
+    });
+
+    it('regresa false si no hay ningún user_tenant_role activo — usado por Sports Hub (UC-SPT-03) para bloquear el alta al roster', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select 1 from user_tenant_role/i, rows: [] }]));
+      const service = new UsersService(db as never, auditLog as never);
+
+      await expect(service.tieneRolActivoEnOrganizacion(ORG_ID, 'user-1')).resolves.toBe(false);
+    });
+  });
 });

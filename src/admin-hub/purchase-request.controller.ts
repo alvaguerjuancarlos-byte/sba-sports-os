@@ -1,15 +1,14 @@
 import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
-import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
+import { MfaRequiredGuard, RequireMfaFor } from '../auth/mfa-required.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/jwt.types.js';
 import { PurchaseRequestService } from './purchase-request.service.js';
 import { PurchaseApprovalService } from './purchase-approval.service.js';
 
 // UC-ADM-02 — Actor: "cualquier rol con permiso de gasto (coach, staff, admin de área)" — a
-// diferencia del resto de Admin Hub, coach también puede capturar una solicitud (por eso
-// MfaRequiredGuard incluye 'coach', ver auth/mfa-required.guard.ts).
+// diferencia del resto de Admin Hub, coach también puede capturar una solicitud.
 @Controller('admin-hub/purchase-requests')
 @UseGuards(JwtAuthGuard, RolesGuard, MfaRequiredGuard)
 @Roles('coach', 'admin', 'director')
@@ -19,7 +18,10 @@ export class PurchaseRequestController {
     private readonly purchaseApprovalService: PurchaseApprovalService,
   ) {}
 
+  // "cualquier rol con acceso a Admin Hub/Payments" requiere MFA (UC-ID-04) — coach normalmente no
+  // lo necesita, pero aquí sí toca Admin Hub, así que se extiende explícitamente solo en esta ruta.
   @Post()
+  @RequireMfaFor('admin', 'director', 'coach')
   crear(
     @CurrentUser() actor: AuthenticatedUser,
     @Body() body: { budgetLineId: string; amount: string | number; justification?: string },

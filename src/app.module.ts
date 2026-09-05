@@ -6,9 +6,10 @@ import { IdentityAccessModule } from './identity-access/identity-access.module.j
 import { ConfigurationStudioModule } from './configuration-studio/configuration-studio.module.js';
 import { AdminHubModule } from './admin-hub/admin-hub.module.js';
 import { PaymentsBillingModule } from './payments-billing/payments-billing.module.js';
+import { SportsHubModule } from './sports-hub/sports-hub.module.js';
 
 @Module({
-  imports: [DatabaseModule, IdentityAccessModule, ConfigurationStudioModule, AdminHubModule, PaymentsBillingModule],
+  imports: [DatabaseModule, IdentityAccessModule, ConfigurationStudioModule, AdminHubModule, PaymentsBillingModule, SportsHubModule],
   controllers: [AppController],
   providers: [AppService],
 })
