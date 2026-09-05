@@ -110,6 +110,16 @@ export class EventService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Attendance/Real-Time, UC-ATT-01/02: "el event
+  // está programado en esa sede en la ventana de tiempo vigente") — así ese dominio nunca hace
+  // SELECT directo contra event, siempre vía este servicio.
+  async obtenerPorId(organizationId: string, eventId: string): Promise<EventRow | null> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<EventRow>(`select * from event where id = $1`, [eventId]);
+      return rows[0] ?? null;
+    });
+  }
+
   private esViolacionDeFk(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23503';
   }

@@ -112,4 +112,22 @@ describe('EventService', () => {
       service.crear({ organizationId: ORG_ID, actorUserId: ACTOR_ID, actorRoles: ['admin'], type: 'training', venueId: 'no-existe', startAt: '2026-08-01T18:00:00Z', endAt: '2026-08-01T19:00:00Z' }),
     ).rejects.toThrow(NotFoundException);
   });
+
+  describe('obtenerPorId', () => {
+    it('regresa null si no existe — para que consumidores de otros dominios (Attendance/Real-Time) puedan decidir sin lanzar', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from event where id/i, rows: [] }]));
+      const service = new EventService(db as never, auditLog as never, rosterServiceFalso([]) as never);
+
+      await expect(service.obtenerPorId(ORG_ID, 'no-existe')).resolves.toBeNull();
+    });
+
+    it('regresa el event si existe', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from event where id/i, rows: [{ id: 'event-1', team_id: 'team-1' }] }]));
+      const service = new EventService(db as never, auditLog as never, rosterServiceFalso([]) as never);
+
+      const resultado = await service.obtenerPorId(ORG_ID, 'event-1');
+
+      expect(resultado?.team_id).toBe('team-1');
+    });
+  });
 });

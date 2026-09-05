@@ -8,6 +8,7 @@ import { AdminHubModule } from './admin-hub/admin-hub.module.js';
 import { PaymentsBillingModule } from './payments-billing/payments-billing.module.js';
 import { SportsHubModule } from './sports-hub/sports-hub.module.js';
 import { CalendarRsvpModule } from './calendar-rsvp/calendar-rsvp.module.js';
+import { AttendanceRealtimeModule } from './attendance-realtime/attendance-realtime.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CalendarRsvpModule } from './calendar-rsvp/calendar-rsvp.module.js';
     PaymentsBillingModule,
     SportsHubModule,
     CalendarRsvpModule,
+    AttendanceRealtimeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
