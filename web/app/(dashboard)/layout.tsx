@@ -145,6 +145,43 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/player-card/gallery" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Galería
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">CRM & Enrollment</p>
+          <Link href="/crm-enrollment" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Prospectos
+          </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">HR / Coach Hub</p>
+          <Link href="/hr-coach-hub/employees" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Expedientes
+          </Link>
+          <Link href="/hr-coach-hub/my-development" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Mi desarrollo
+          </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Family & Communications</p>
+          <Link href="/family/panel" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Panel familiar
+          </Link>
+          <Link href="/family/notifications" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Notificaciones
+          </Link>
+          <Link href="/family/notification-preferences" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Preferencias
+          </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Reporting & AI</p>
+          <Link href="/reporting-ai/dashboard" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Dashboard ejecutivo
+          </Link>
+          <Link href="/reporting-ai/financial-report" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Reporte financiero
+          </Link>
+          <Link href="/reporting-ai/unit-economics" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Unit economics
+          </Link>
+          <Link href="/reporting-ai/conversion-analytics" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Conversión CRM
+          </Link>
+          <Link href="/reporting-ai/agent" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Agente conversacional
+          </Link>
         </nav>
         <LogoutButton />
       </aside>

@@ -29,5 +29,9 @@ export const config = {
     '/weekly-feedback/:path*',
     '/performance/:path*',
     '/player-card/:path*',
+    '/crm-enrollment/:path*',
+    '/hr-coach-hub/:path*',
+    '/family/:path*',
+    '/reporting-ai/:path*',
   ],
 };
