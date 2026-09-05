@@ -128,4 +128,16 @@ export class GuardianConsentService {
       return rows.map((r) => r.athlete_user_id);
     });
   }
+
+  // Lectura para el frontend — bandeja de consentimientos pendientes de la organización (UC-ID-03,
+  // paso 2: "guardian_link con consent_status = requested" a la espera de que el tutor otorgue o
+  // niegue). Sin esto no hay forma de mostrar qué falta resolver.
+  async listarPendientesDeOrganizacion(organizationId: string): Promise<GuardianLinkRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<GuardianLinkRow>(
+        `select * from guardian_link where consent_status = 'requested' order by created_at`,
+      );
+      return rows;
+    });
+  }
 }

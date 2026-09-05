@@ -38,6 +38,21 @@ export interface GuardianLinkRow {
   updated_at: string;
 }
 
+// Fila combinada para pantallas de administración (ej. frontend, listado de usuarios) — un
+// user_tenant_role con los datos del user ya resueltos, para no obligar a un segundo viaje por
+// cada fila. [propuesto]: no hay UC-ID literal que pida esta forma exacta, pero sin ella no hay
+// manera de listar "las personas de esta organización" sin N+1 consultas.
+export interface UsuarioDeOrganizacionRow {
+  user_tenant_role_id: string;
+  user_id: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  date_of_birth: string;
+  role: TenantRole;
+  status: TenantRoleStatus;
+}
+
 // Edad de mayoría de edad para efectos de esta plataforma — LFPDPPP/legislación mexicana general
 // (arquitectura §7.1, marco regulatorio primario). No está como número explícito en los
 // documentos de Fase 2 leídos — [propuesto], mismo criterio del diccionario de datos para

@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import type { PoolClient } from 'pg';
 import { DatabaseService } from '../db/database.service.js';
 import { AuditLogService } from '../shared/audit-log/audit-log.service.js';
-import { calcularEsMenorDeEdad, type TenantRole, type UserRow, type UserTenantRoleRow } from './identity-access.types.js';
+import { calcularEsMenorDeEdad, type TenantRole, type UserRow, type UserTenantRoleRow, type UsuarioDeOrganizacionRow } from './identity-access.types.js';
 
 export interface AltaUsuarioInput {
   organizationId: string;
@@ -222,6 +222,28 @@ export class UsersService {
   async listarRolesDeUsuario(organizationId: string, userId: string): Promise<UserTenantRoleRow[]> {
     return this.db.withTenant(organizationId, async (client) => {
       const { rows } = await client.query<UserTenantRoleRow>(`select * from user_tenant_role where user_id = $1`, [userId]);
+      return rows;
+    });
+  }
+
+  // Lectura para el frontend (listado de administración) — un renglón por (user, role) de la
+  // organización, ya resuelto contra "user" para no forzar un N+1 en el llamador.
+  async listarUsuariosDeOrganizacion(organizationId: string): Promise<UsuarioDeOrganizacionRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<UsuarioDeOrganizacionRow>(
+        `select
+           utr.id as user_tenant_role_id,
+           u.id as user_id,
+           u.full_name,
+           u.email,
+           u.phone,
+           u.date_of_birth,
+           utr.role,
+           utr.status
+         from user_tenant_role utr
+         join "user" u on u.id = utr.user_id
+         order by u.full_name`,
+      );
       return rows;
     });
   }

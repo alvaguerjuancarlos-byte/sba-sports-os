@@ -1,5 +1,6 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/jwt.types.js';
 import { GuardianConsentService } from './guardian-consent.service.js';
@@ -12,6 +13,15 @@ import { GuardianConsentService } from './guardian-consent.service.js';
 @UseGuards(JwtAuthGuard)
 export class GuardianConsentController {
   constructor(private readonly guardianConsentService: GuardianConsentService) {}
+
+  // Lectura para el frontend — bandeja de pendientes de la organización, solo staff (a diferencia
+  // de otorgar/negar, que cualquier tutor autenticado puede hacer sobre SU propio guardian_link).
+  @Get('pending')
+  @UseGuards(RolesGuard)
+  @Roles('admin', 'director')
+  listarPendientes(@CurrentUser() actor: AuthenticatedUser) {
+    return this.guardianConsentService.listarPendientesDeOrganizacion(actor.organizationId);
+  }
 
   @Post(':id/grant')
   otorgarConsentimiento(

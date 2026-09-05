@@ -19,6 +19,7 @@ import { CrmEnrollmentModule } from './crm-enrollment/crm-enrollment.module.js';
 import { HrCoachHubModule } from './hr-coach-hub/hr-coach-hub.module.js';
 import { FamilyCommunicationsModule } from './family-communications/family-communications.module.js';
 import { ReportingAiModule } from './reporting-ai/reporting-ai.module.js';
+import { DevLoginModule } from './auth/dev-login/dev-login.module.js';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ReportingAiModule } from './reporting-ai/reporting-ai.module.js';
     HrCoachHubModule,
     FamilyCommunicationsModule,
     ReportingAiModule,
+    DevLoginModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
@@ -29,6 +29,12 @@ interface AsignarRolBody {
 @Roles('admin', 'director')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  // Lectura para el frontend — listado de administración de la organización.
+  @Get()
+  listar(@CurrentUser() actor: AuthenticatedUser) {
+    return this.usersService.listarUsuariosDeOrganizacion(actor.organizationId);
+  }
 
   // UC-ID-01
   @Post()

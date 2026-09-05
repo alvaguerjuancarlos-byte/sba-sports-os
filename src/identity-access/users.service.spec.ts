@@ -315,4 +315,19 @@ describe('UsersService', () => {
       await expect(service.obtenerPorId('no-existe')).resolves.toBeNull();
     });
   });
+
+  describe('listarUsuariosDeOrganizacion', () => {
+    it('regresa un renglón por (user, role) ya resuelto contra "user"', async () => {
+      const stubs: QueryStub[] = [
+        { matcher: /join "user" u on u\.id = utr\.user_id/i, rows: [{ user_tenant_role_id: 'utr-1', user_id: 'user-1', full_name: 'Ana', role: 'coach', status: 'active' }] },
+      ];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new UsersService(db as never, auditLog as never);
+
+      const resultado = await service.listarUsuariosDeOrganizacion(ORG_ID);
+
+      expect(resultado).toHaveLength(1);
+      expect(resultado[0].full_name).toBe('Ana');
+    });
+  });
 });

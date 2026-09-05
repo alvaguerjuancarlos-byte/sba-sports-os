@@ -139,4 +139,17 @@ describe('GuardianConsentService', () => {
       await expect(service.listarAtletasDeGuardian(ORG_ID, 'tutor-1')).resolves.toEqual(['atleta-1', 'atleta-2']);
     });
   });
+
+  describe('listarPendientesDeOrganizacion', () => {
+    it('regresa solo los guardian_link en consent_status=requested', async () => {
+      const stubs: QueryStub[] = [{ matcher: /consent_status = 'requested'/i, rows: [{ id: LINK_ID, consent_status: 'requested' }] }];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new GuardianConsentService(db as never, auditLog as never);
+
+      const resultado = await service.listarPendientesDeOrganizacion(ORG_ID);
+
+      expect(resultado).toHaveLength(1);
+      expect(resultado[0].consent_status).toBe('requested');
+    });
+  });
 });
