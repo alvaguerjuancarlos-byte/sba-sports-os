@@ -56,4 +56,13 @@ export class PerformanceAssessmentService {
       return rows;
     });
   }
+
+  // Lectura para consumidores de otros dominios (ej. Player Card, UC-PLC-01: sección de
+  // performance — historial completo, no un rango de fechas).
+  async listarPorJugador(organizationId: string, playerId: string): Promise<PerformanceAssessmentRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<PerformanceAssessmentRow>(`select * from performance_assessment where player_id = $1 order by assessment_date desc`, [playerId]);
+      return rows;
+    });
+  }
 }

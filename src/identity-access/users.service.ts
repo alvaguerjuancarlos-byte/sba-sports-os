@@ -204,6 +204,15 @@ export class UsersService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Player Card, UC-PLC-01: sección
+  // administrativa) — así ese dominio nunca hace SELECT directo contra user_tenant_role.
+  async listarRolesDeUsuario(organizationId: string, userId: string): Promise<UserTenantRoleRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<UserTenantRoleRow>(`select * from user_tenant_role where user_id = $1`, [userId]);
+      return rows;
+    });
+  }
+
   // "user" es global, sin RLS (arquitectura §3.4) — no necesita withTenant. Lectura para
   // consumidores de otros dominios (ej. Calendar & RSVP, UC-CAL-03: necesita date_of_birth para
   // saber si quien debe responder un RSVP es menor de edad) que nunca deben leer esta tabla directo.

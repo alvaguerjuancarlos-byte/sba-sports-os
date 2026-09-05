@@ -198,6 +198,15 @@ export class CheckinService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Player Card, UC-PLC-01: sección de
+  // "asistencia" — historial completo, no un conteo).
+  async listarPorUsuario(organizationId: string, userId: string): Promise<CheckinEventRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<CheckinEventRow>(`select * from checkin_event where user_id = $1 order by checked_in_at desc`, [userId]);
+      return rows;
+    });
+  }
+
   private esViolacionDeUnicidad(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23505';
   }

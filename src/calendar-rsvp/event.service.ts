@@ -120,6 +120,17 @@ export class EventService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Player Card, UC-PLC-01: sección de
+  // "calendario" de un atleta específico, no del actor que consulta) — así ese dominio nunca hace
+  // SELECT directo contra event.
+  async listarPorEquipos(organizationId: string, teamIds: string[]): Promise<EventRow[]> {
+    if (teamIds.length === 0) return [];
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<EventRow>(`select * from event where team_id = any($1::uuid[]) order by start_at desc`, [teamIds]);
+      return rows;
+    });
+  }
+
   private esViolacionDeFk(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23503';
   }
