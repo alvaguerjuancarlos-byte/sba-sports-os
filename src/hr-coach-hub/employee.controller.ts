@@ -15,6 +15,16 @@ import type { EmployeeStatus } from './hr-coach-hub.types.js';
 export class EmployeeController {
   constructor(private readonly service: EmployeeService) {}
 
+  // Excepción deliberada y mínima a la restricción de arriba: cualquier rol autenticado puede
+  // resolver SU PROPIO employeeId (nunca contract_type/hire_date/status, eso sigue admin/director
+  // únicamente) — es lo que UC-HR-04 necesita para que un coach consulte sus propios objetivos.
+  @Get('mine/id')
+  @Roles()
+  async miPropioId(@CurrentUser() actor: AuthenticatedUser) {
+    const employeeId = await this.service.obtenerIdPorUsuario(actor.organizationId, actor.userId);
+    return { employeeId };
+  }
+
   @Post()
   altaExpediente(@CurrentUser() actor: AuthenticatedUser, @Body() body: { userId?: string; contractType: string; hireDate: string }) {
     return this.service.altaExpediente({

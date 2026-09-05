@@ -45,4 +45,20 @@ describe('EmployeeService', () => {
       expect(resultado.status).toBe('inactive');
     });
   });
+
+  describe('obtenerIdPorUsuario', () => {
+    it('regresa null si el user no tiene expediente', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select id from employee where user_id/i, rows: [] }]));
+      const service = new EmployeeService(db as never, crearAuditLogFalso() as never);
+
+      await expect(service.obtenerIdPorUsuario(ORG_ID, 'coach-1')).resolves.toBeNull();
+    });
+
+    it('regresa solo el id, nunca el resto del expediente', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select id from employee where user_id/i, rows: [{ id: EMPLOYEE_ID }] }]));
+      const service = new EmployeeService(db as never, crearAuditLogFalso() as never);
+
+      await expect(service.obtenerIdPorUsuario(ORG_ID, 'coach-1')).resolves.toBe(EMPLOYEE_ID);
+    });
+  });
 });

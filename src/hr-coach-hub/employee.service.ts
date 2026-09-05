@@ -102,4 +102,14 @@ export class EmployeeService {
       return rows[0] ?? null;
     });
   }
+
+  // Lectura mínima para que un coach resuelva su propio employeeId (necesario para UC-HR-04,
+  // "todo coach_objective es consultable por el propio coach") sin exponerle su expediente
+  // completo — devuelve solo el id, nunca contract_type/hire_date/status.
+  async obtenerIdPorUsuario(organizationId: string, userId: string): Promise<string | null> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<{ id: string }>(`select id from employee where user_id = $1`, [userId]);
+      return rows[0]?.id ?? null;
+    });
+  }
 }
