@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
@@ -36,5 +36,11 @@ export class LeagueController {
   @Roles('player', 'coach', 'admin', 'parent', 'director')
   consultarHistorial(@CurrentUser() actor: AuthenticatedUser, @Param('id') id: string) {
     return this.leagueService.consultarHistorial(actor.organizationId, id);
+  }
+
+  @Get()
+  @Roles('player', 'coach', 'admin', 'parent', 'director')
+  listar(@CurrentUser() actor: AuthenticatedUser, @Query('seasonId') seasonId?: string) {
+    return this.leagueService.listar(actor.organizationId, { seasonId });
   }
 }

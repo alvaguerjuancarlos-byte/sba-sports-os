@@ -113,6 +113,19 @@ export class LeagueService {
     });
   }
 
+  async listar(organizationId: string, opciones: { seasonId?: string } = {}): Promise<LeagueCupRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      if (opciones.seasonId) {
+        const { rows } = await client.query<LeagueCupRow>(`select * from league_cup where season_id = $1 order by created_at desc`, [
+          opciones.seasonId,
+        ]);
+        return rows;
+      }
+      const { rows } = await client.query<LeagueCupRow>(`select * from league_cup order by created_at desc`);
+      return rows;
+    });
+  }
+
   private esViolacionDeFk(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23503';
   }

@@ -92,4 +92,16 @@ describe('LeagueService', () => {
       expect(resultado.standings).toHaveLength(1);
     });
   });
+
+  describe('listar', () => {
+    it('regresa los league_cup de la organización', async () => {
+      const stubs: QueryStub[] = [{ matcher: /select \* from league_cup order by created_at desc/i, rows: [{ id: 'cup-1' }] }];
+      const db = crearDbFalsa(crearClientFalso(stubs));
+      const service = new LeagueService(db as never, auditLog as never);
+
+      const resultado = await service.listar(ORG_ID);
+
+      expect(resultado).toHaveLength(1);
+    });
+  });
 });
