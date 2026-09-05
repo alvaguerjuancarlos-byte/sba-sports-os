@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
+import { listarDirectorio } from '@/lib/identity';
 import type { InventoryCheckout, InventoryItem } from '@/lib/types/facilities-inventory';
-import type { UsuarioDeOrganizacion } from '@/lib/types/identity';
 import { NewCheckoutForm } from './new-checkout-form';
 import { CheckoutRow } from './checkout-row';
 
@@ -8,7 +8,7 @@ export default async function CheckoutsPage() {
   const [pendientes, items, usuarios] = await Promise.all([
     api.get<InventoryCheckout[]>('/facilities-inventory/checkouts/pending-return'),
     api.get<InventoryItem[]>('/facilities-inventory/items'),
-    api.get<UsuarioDeOrganizacion[]>('/identity/users'),
+    listarDirectorio(),
   ]);
   const itemsActivos = items.filter((i) => i.status === 'active');
   const nombrePorItem = new Map(items.map((i) => [i.id, i.name]));

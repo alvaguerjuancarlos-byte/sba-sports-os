@@ -14,6 +14,16 @@ export interface UsuarioDeOrganizacion {
   status: TenantRoleStatus;
 }
 
+// GET /identity/users/directory — redactado (sin email/teléfono/fecha de nacimiento), accesible
+// también a coach. Usar en pantallas fuera de Identity & Access que solo necesitan resolver un
+// nombre o poblar un selector de candidatos.
+export interface UsuarioDeDirectorio {
+  user_id: string;
+  full_name: string;
+  role: TenantRole;
+  status: TenantRoleStatus;
+}
+
 export interface GuardianLink {
   id: string;
   organization_id: string;

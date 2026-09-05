@@ -107,6 +107,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/facilities/availability" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Disponibilidad
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Call-up Engine</p>
+          <Link href="/callup-engine" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Convocatorias
+          </Link>
+          <Link href="/callup-engine/format-rules" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Reglas de formato
+          </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Match Center</p>
+          <Link href="/match-center" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Partidos
+          </Link>
         </nav>
         <LogoutButton />
       </aside>

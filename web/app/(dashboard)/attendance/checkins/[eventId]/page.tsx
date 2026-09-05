@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
+import { listarDirectorio } from '@/lib/identity';
 import type { RevisarAsistenciaResultado } from '@/lib/types/attendance-realtime';
-import type { UsuarioDeOrganizacion } from '@/lib/types/identity';
 import { CheckinForms } from './checkin-forms';
 
 export default async function CheckinDetailPage({ params }: { params: Promise<{ eventId: string }> }) {
@@ -9,7 +9,7 @@ export default async function CheckinDetailPage({ params }: { params: Promise<{ 
   const [asistencia, aforo, usuarios] = await Promise.all([
     api.get<RevisarAsistenciaResultado>(`/attendance-realtime/events/${eventId}/attendance-review`),
     api.get<number>(`/attendance-realtime/events/${eventId}/headcount`),
-    api.get<UsuarioDeOrganizacion[]>('/identity/users'),
+    listarDirectorio(),
   ]);
   const nombrePorUsuario = new Map(usuarios.map((u) => [u.user_id, u.full_name]));
   const faltantesConNombre = usuarios.filter((u) => asistencia.faltantes.includes(u.user_id));

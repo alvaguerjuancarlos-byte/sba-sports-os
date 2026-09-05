@@ -3,11 +3,11 @@
 import { useActionState } from 'react';
 import { registrarCheckinFacialAction, registrarCheckinManualAction } from './actions';
 import type { AccionState } from './actions';
-import type { UsuarioDeOrganizacion } from '@/lib/types/identity';
+import type { UsuarioDeDirectorio } from '@/lib/types/identity';
 
 const ESTADO_INICIAL: AccionState = { error: null };
 
-export function CheckinForms({ eventId, faltantesConNombre }: { eventId: string; faltantesConNombre: UsuarioDeOrganizacion[] }) {
+export function CheckinForms({ eventId, faltantesConNombre }: { eventId: string; faltantesConNombre: UsuarioDeDirectorio[] }) {
   const accionFacial = registrarCheckinFacialAction.bind(null, eventId);
   const accionManual = registrarCheckinManualAction.bind(null, eventId);
   const [stateFacial, formActionFacial, pendingFacial] = useActionState(accionFacial, ESTADO_INICIAL);

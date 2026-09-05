@@ -3,11 +3,11 @@
 import { useActionState } from 'react';
 import { crearRosterMembershipAction } from './actions';
 import type { AccionState } from './actions';
-import type { UsuarioDeOrganizacion } from '@/lib/types/identity';
+import type { UsuarioDeDirectorio } from '@/lib/types/identity';
 
 const ESTADO_INICIAL: AccionState = { error: null };
 
-export function NewRosterForm({ teamId, candidatos }: { teamId: string; candidatos: UsuarioDeOrganizacion[] }) {
+export function NewRosterForm({ teamId, candidatos }: { teamId: string; candidatos: UsuarioDeDirectorio[] }) {
   const accionConTeamId = crearRosterMembershipAction.bind(null, teamId);
   const [state, formAction, pending] = useActionState(accionConTeamId, ESTADO_INICIAL);
 

@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
+import { listarDirectorio } from '@/lib/identity';
 import type { RosterMembership, Team } from '@/lib/types/sports-hub';
-import type { UsuarioDeOrganizacion } from '@/lib/types/identity';
 import { NewRosterForm } from './new-roster-form';
 import { RosterRow } from './roster-row';
 
@@ -10,7 +10,7 @@ export default async function TeamRosterPage({ params }: { params: Promise<{ tea
   const [equipos, roster, usuarios] = await Promise.all([
     api.get<Team[]>('/sports-hub/teams'),
     api.get<RosterMembership[]>(`/sports-hub/teams/${teamId}/roster`),
-    api.get<UsuarioDeOrganizacion[]>('/identity/users'),
+    listarDirectorio(),
   ]);
 
   const team = equipos.find((t) => t.id === teamId);
