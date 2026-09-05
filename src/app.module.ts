@@ -12,6 +12,7 @@ import { AttendanceRealtimeModule } from './attendance-realtime/attendance-realt
 import { FacilitiesInventoryModule } from './facilities-inventory/facilities-inventory.module.js';
 import { CallupEngineModule } from './callup-engine/callup-engine.module.js';
 import { MatchCenterModule } from './match-center/match-center.module.js';
+import { WeeklyCoachFeedbackModule } from './weekly-coach-feedback/weekly-coach-feedback.module.js';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MatchCenterModule } from './match-center/match-center.module.js';
     FacilitiesInventoryModule,
     CallupEngineModule,
     MatchCenterModule,
+    WeeklyCoachFeedbackModule,
   ],
   controllers: [AppController],
   providers: [AppService],
