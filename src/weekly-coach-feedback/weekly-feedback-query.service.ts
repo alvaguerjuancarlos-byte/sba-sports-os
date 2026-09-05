@@ -42,6 +42,21 @@ export class WeeklyFeedbackQueryService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Performance, UC-PRF-01: dimensión de
+  // "actitud semanal" del Development Map) — sin verificación de scope, es un método de uso
+  // interno entre dominios, no un endpoint expuesto a un actor humano (mismo criterio que
+  // CallupListService.obtenerSlotConfirmado). El scope de quién puede pedir el Development Map en
+  // sí lo resuelve el controller de Performance.
+  async listarPorJugadorEnRango(organizationId: string, playerId: string, desde: string, hasta: string): Promise<WeeklyFeedbackRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<WeeklyFeedbackRow>(
+        `select * from weekly_feedback where player_id = $1 and week_ending between $2 and $3 order by week_ending`,
+        [playerId, desde, hasta],
+      );
+      return rows;
+    });
+  }
+
   private async verificarAcceso(input: ConsultarHistoricoInput): Promise<void> {
     const esStaff = input.actorRoles.some((role) => role === 'admin' || role === 'director' || role === 'coach');
     if (esStaff) return;

@@ -13,6 +13,7 @@ import { FacilitiesInventoryModule } from './facilities-inventory/facilities-inv
 import { CallupEngineModule } from './callup-engine/callup-engine.module.js';
 import { MatchCenterModule } from './match-center/match-center.module.js';
 import { WeeklyCoachFeedbackModule } from './weekly-coach-feedback/weekly-coach-feedback.module.js';
+import { PerformanceModule } from './performance/performance.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WeeklyCoachFeedbackModule } from './weekly-coach-feedback/weekly-coach-
     CallupEngineModule,
     MatchCenterModule,
     WeeklyCoachFeedbackModule,
+    PerformanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

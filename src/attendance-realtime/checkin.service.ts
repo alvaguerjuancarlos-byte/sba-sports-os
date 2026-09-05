@@ -181,6 +181,23 @@ export class CheckinService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Performance, UC-PRF-01: dimensión de
+  // "asistencia" del Development Map dentro de un rango de fechas específico, no solo "desde") —
+  // mismo criterio de join directo contra `event` ya usado en contarCheckinsDesde/aforoPorSede de
+  // este mismo servicio.
+  async contarCheckinsEnRango(organizationId: string, userId: string, teamId: string, desde: Date, hasta: Date): Promise<number> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<{ total: string }>(
+        `select count(*) as total
+         from checkin_event c
+         join event e on e.id = c.event_id
+         where c.user_id = $1 and e.team_id = $2 and c.checked_in_at >= $3 and c.checked_in_at <= $4`,
+        [userId, teamId, desde.toISOString(), hasta.toISOString()],
+      );
+      return Number(rows[0].total);
+    });
+  }
+
   private esViolacionDeUnicidad(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23505';
   }

@@ -47,4 +47,22 @@ export class MatchQueryService {
       return rows;
     });
   }
+
+  // Lectura para consumidores de otros dominios (ej. Performance, UC-PRF-01: dimensión de
+  // "rendimiento en partido" del Development Map dentro de un rango de fechas) — el filtro es por
+  // la fecha del EVENTO (event.start_at), no de player_statistic (que no tiene columna de fecha
+  // propia); mismo criterio de join directo contra `event` ya usado en
+  // AttendanceRealtime.CheckinService.contarCheckinsEnRango.
+  async consultarEstadisticasDeJugadorEnRango(organizationId: string, userId: string, desde: Date, hasta: Date): Promise<PlayerStatisticRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<PlayerStatisticRow>(
+        `select ps.* from player_statistic ps
+         join event e on e.id = ps.event_id
+         where ps.user_id = $1 and e.start_at >= $2 and e.start_at <= $3
+         order by e.start_at`,
+        [userId, desde.toISOString(), hasta.toISOString()],
+      );
+      return rows;
+    });
+  }
 }
