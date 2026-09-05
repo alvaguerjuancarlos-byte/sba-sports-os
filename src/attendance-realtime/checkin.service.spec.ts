@@ -169,4 +169,13 @@ describe('CheckinService', () => {
       await expect(service.aforoPorSede(ORG_ID, 'venue-1')).resolves.toEqual([{ eventId: 'event-1', checkins: 3 }]);
     });
   });
+
+  describe('contarCheckinsDesde', () => {
+    it('cuenta los checkin_event del usuario en ese equipo desde la fecha dada — usado por Call-up Engine (UC-CUP-03)', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /join event e on e\.id = c\.event_id/i, rows: [{ total: '4' }] }]));
+      const service = new CheckinService(db as never, eventServiceFalso(null) as never, rosterServiceFalso([]) as never);
+
+      await expect(service.contarCheckinsDesde(ORG_ID, USER_ID, 'team-1', new Date('2026-01-01'))).resolves.toBe(4);
+    });
+  });
 });

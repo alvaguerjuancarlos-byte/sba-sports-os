@@ -10,6 +10,7 @@ import { SportsHubModule } from './sports-hub/sports-hub.module.js';
 import { CalendarRsvpModule } from './calendar-rsvp/calendar-rsvp.module.js';
 import { AttendanceRealtimeModule } from './attendance-realtime/attendance-realtime.module.js';
 import { FacilitiesInventoryModule } from './facilities-inventory/facilities-inventory.module.js';
+import { CallupEngineModule } from './callup-engine/callup-engine.module.js';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { FacilitiesInventoryModule } from './facilities-inventory/facilities-inv
     CalendarRsvpModule,
     AttendanceRealtimeModule,
     FacilitiesInventoryModule,
+    CallupEngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

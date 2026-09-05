@@ -165,6 +165,22 @@ export class CheckinService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Call-up Engine, UC-CUP-03: "puntaje de
+  // prioridad por jugador basado en asistencia de la(s) semana(s) relevante(s)") — así ese
+  // dominio nunca hace SELECT directo contra checkin_event, siempre vía este servicio.
+  async contarCheckinsDesde(organizationId: string, userId: string, teamId: string, desde: Date): Promise<number> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<{ total: string }>(
+        `select count(*) as total
+         from checkin_event c
+         join event e on e.id = c.event_id
+         where c.user_id = $1 and e.team_id = $2 and c.checked_in_at >= $3`,
+        [userId, teamId, desde.toISOString()],
+      );
+      return Number(rows[0].total);
+    });
+  }
+
   private esViolacionDeUnicidad(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23505';
   }
