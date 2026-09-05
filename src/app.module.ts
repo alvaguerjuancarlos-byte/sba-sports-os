@@ -9,6 +9,7 @@ import { PaymentsBillingModule } from './payments-billing/payments-billing.modul
 import { SportsHubModule } from './sports-hub/sports-hub.module.js';
 import { CalendarRsvpModule } from './calendar-rsvp/calendar-rsvp.module.js';
 import { AttendanceRealtimeModule } from './attendance-realtime/attendance-realtime.module.js';
+import { FacilitiesInventoryModule } from './facilities-inventory/facilities-inventory.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AttendanceRealtimeModule } from './attendance-realtime/attendance-realt
     SportsHubModule,
     CalendarRsvpModule,
     AttendanceRealtimeModule,
+    FacilitiesInventoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
