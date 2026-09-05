@@ -54,6 +54,25 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/admin-hub/budget-report" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Presupuesto vs. real
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Payments & Billing</p>
+          <Link href="/payments/membership-plans" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Planes de membresía
+          </Link>
+          <Link href="/payments/invoices" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Facturas
+          </Link>
+          <Link href="/payments/transactions" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Pagos
+          </Link>
+          <Link href="/payments/accounts" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Cuentas y saldo
+          </Link>
+          <Link href="/payments/eligibility" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Elegibilidad
+          </Link>
+          <Link href="/payments/collections" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Cobranza
+          </Link>
         </nav>
         <LogoutButton />
       </aside>
