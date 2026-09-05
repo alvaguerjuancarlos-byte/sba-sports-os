@@ -83,6 +83,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/sports-hub/league-cups" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Ligas y copas
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Calendar & RSVP</p>
+          <Link href="/calendar" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Calendario
+          </Link>
+          <Link href="/calendar/venues" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Sedes
+          </Link>
         </nav>
         <LogoutButton />
       </aside>
