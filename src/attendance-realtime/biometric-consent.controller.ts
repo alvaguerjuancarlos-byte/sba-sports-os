@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/jwt.types.js';
@@ -19,6 +19,11 @@ export class BiometricConsentController {
   @Post(':userId/revoke')
   revocar(@CurrentUser() actor: AuthenticatedUser, @Param('userId') userId: string) {
     return this.biometricConsentService.revocar({ organizationId: actor.organizationId, actorUserId: actor.userId, userId });
+  }
+
+  @Get(':userId')
+  obtenerEstado(@CurrentUser() actor: AuthenticatedUser, @Param('userId') userId: string) {
+    return this.biometricConsentService.obtenerEstado(actor.organizationId, userId);
   }
 
   // [propuesto] — enrolamiento del template, ver biometric-consent.service.ts.

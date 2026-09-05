@@ -135,6 +135,14 @@ export class BiometricConsentService {
     });
   }
 
+  // Lectura para el frontend — saber si mostrar "otorgar" o "revocar" sin adivinar el estado.
+  async obtenerEstado(organizationId: string, userId: string): Promise<BiometricConsentRow | null> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<BiometricConsentRow>(`select * from biometric_consent where user_id = $1`, [userId]);
+      return rows[0] ?? null;
+    });
+  }
+
   // [propuesto] — sin caso de uso propio en el documento fuente (UC-ATT-01 asume el template ya
   // "almacenado" como precondición); esta es la acción mínima de enrolamiento, gateada por el
   // mismo consentimiento otorgado — no se puede enrolar sin haber consentido primero.

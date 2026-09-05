@@ -132,4 +132,23 @@ describe('BiometricConsentService', () => {
       ).resolves.toBeUndefined();
     });
   });
+
+  describe('obtenerEstado', () => {
+    it('regresa null si nunca se ha gestionado consentimiento para ese user', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from biometric_consent where user_id/i, rows: [] }]));
+      const service = new BiometricConsentService(db as never, auditLog as never, usersServiceFalso(ADULTO) as never, guardianServiceFalso(false) as never);
+
+      await expect(service.obtenerEstado(ORG_ID, ADULTO.id)).resolves.toBeNull();
+    });
+
+    it('regresa el registro existente', async () => {
+      const existente = { id: 'bc-1', user_id: ADULTO.id, consent_status: 'granted' };
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from biometric_consent where user_id/i, rows: [existente] }]));
+      const service = new BiometricConsentService(db as never, auditLog as never, usersServiceFalso(ADULTO) as never, guardianServiceFalso(false) as never);
+
+      const resultado = await service.obtenerEstado(ORG_ID, ADULTO.id);
+
+      expect(resultado?.consent_status).toBe('granted');
+    });
+  });
 });
