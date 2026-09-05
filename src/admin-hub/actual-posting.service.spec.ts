@@ -57,4 +57,11 @@ describe('ActualPostingService', () => {
     expect(llamadasEditanMontoCommitment).toHaveLength(0);
     expect(auditLog.record).toHaveBeenCalledOnce();
   });
+
+  it('listar regresa los actual_posting de la organización', async () => {
+    const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from actual_posting/i, rows: [{ id: 'ap-1' }] }]));
+    const service = new ActualPostingService(db as never, auditLog as never);
+
+    await expect(service.listar(ORG_ID)).resolves.toHaveLength(1);
+  });
 });

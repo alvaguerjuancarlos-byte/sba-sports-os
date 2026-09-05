@@ -82,6 +82,15 @@ export class PurchaseOrderService {
     });
   }
 
+  // Lectura para el frontend — elegir una purchase_order al registrar un actual_posting
+  // (UC-ADM-05) y ver el historial de órdenes emitidas.
+  async listar(organizationId: string): Promise<PurchaseOrderRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<PurchaseOrderRow>(`select * from purchase_order order by created_at desc`);
+      return rows;
+    });
+  }
+
   private esViolacionDeFk(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23503';
   }

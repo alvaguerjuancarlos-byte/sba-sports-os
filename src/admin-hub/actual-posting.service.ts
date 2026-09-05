@@ -73,4 +73,12 @@ export class ActualPostingService {
       return { actualPosting, commitment: commitmentUpdated[0] };
     });
   }
+
+  // Lectura para el frontend — historial de postings reales.
+  async listar(organizationId: string): Promise<ActualPostingRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<ActualPostingRow>(`select * from actual_posting order by posted_at desc`);
+      return rows;
+    });
+  }
 }

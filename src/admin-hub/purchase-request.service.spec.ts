@@ -82,4 +82,11 @@ describe('PurchaseRequestService', () => {
 
     expect(auditLog.record).toHaveBeenCalledOnce();
   });
+
+  it('listar filtra por status (ej. pending para la bandeja de aprobación)', async () => {
+    const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from purchase_request where status/i, rows: [{ id: 'pr-1', status: 'pending' }] }]));
+    const service = new PurchaseRequestService(db as never, auditLog as never);
+
+    await expect(service.listar(ORG_ID, { status: 'pending' })).resolves.toHaveLength(1);
+  });
 });

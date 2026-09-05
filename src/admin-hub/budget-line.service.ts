@@ -91,6 +91,19 @@ export class BudgetLineService {
     });
   }
 
+  // Lectura para el frontend — sin esto no hay forma de mostrar/elegir un budget_line existente
+  // (ej. al capturar una purchase_request, UC-ADM-02).
+  async listar(organizationId: string, opciones: { status?: 'active' | 'archived' } = {}): Promise<BudgetLineRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      if (opciones.status) {
+        const { rows } = await client.query<BudgetLineRow>(`select * from budget_line where status = $1 order by season, period`, [opciones.status]);
+        return rows;
+      }
+      const { rows } = await client.query<BudgetLineRow>(`select * from budget_line order by season, period`);
+      return rows;
+    });
+  }
+
   private esViolacionDeFk(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23503';
   }

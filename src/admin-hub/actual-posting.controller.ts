@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
@@ -25,5 +25,10 @@ export class ActualPostingController {
       amount: body.amount,
       postedAt: body.postedAt ? new Date(body.postedAt) : null,
     });
+  }
+
+  @Get()
+  listar(@CurrentUser() actor: AuthenticatedUser) {
+    return this.actualPostingService.listar(actor.organizationId);
   }
 }

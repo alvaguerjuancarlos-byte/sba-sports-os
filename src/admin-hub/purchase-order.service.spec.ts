@@ -86,4 +86,11 @@ describe('PurchaseOrderService', () => {
     expect(resultado.commitment.amount).toBe(resultado.purchaseOrder.amount);
     expect(auditLog.record).toHaveBeenCalledOnce();
   });
+
+  it('listar regresa las purchase_order de la organización', async () => {
+    const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from purchase_order/i, rows: [{ id: 'po-1' }] }]));
+    const service = new PurchaseOrderService(db as never, auditLog as never);
+
+    await expect(service.listar(ORG_ID)).resolves.toHaveLength(1);
+  });
 });

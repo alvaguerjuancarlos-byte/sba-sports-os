@@ -1,10 +1,11 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/jwt.types.js';
 import { BudgetLineService } from './budget-line.service.js';
+import type { AdminHubStatus } from './admin-hub.types.js';
 
 // UC-ADM-01 — Actor: Admin financiero.
 @Controller('admin-hub/budget-lines')
@@ -31,5 +32,10 @@ export class BudgetLineController {
   @Post(':id/archive')
   archivar(@CurrentUser() actor: AuthenticatedUser, @Param('id') id: string) {
     return this.budgetLineService.archivar({ organizationId: actor.organizationId, actorUserId: actor.userId, budgetLineId: id });
+  }
+
+  @Get()
+  listar(@CurrentUser() actor: AuthenticatedUser, @Query('status') status?: AdminHubStatus) {
+    return this.budgetLineService.listar(actor.organizationId, { status });
   }
 }

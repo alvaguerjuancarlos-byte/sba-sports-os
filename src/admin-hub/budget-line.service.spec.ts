@@ -113,4 +113,13 @@ describe('BudgetLineService', () => {
       expect(llamadasDelete).toHaveLength(0);
     });
   });
+
+  describe('listar', () => {
+    it('filtra por status cuando se especifica', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from budget_line where status/i, rows: [{ id: 'bl-1', status: 'active' }] }]));
+      const service = new BudgetLineService(db as never, auditLog as never);
+
+      await expect(service.listar(ORG_ID, { status: 'active' })).resolves.toHaveLength(1);
+    });
+  });
 });

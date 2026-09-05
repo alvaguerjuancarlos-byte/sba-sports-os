@@ -60,6 +60,19 @@ export class PurchaseRequestService {
   // UC-ADM-02 paso 2, criterio de aceptación: "el cálculo de saldo disponible siempre resta
   // commitments abiertos, no solo actual_postings — de lo contrario dos solicitudes simultáneas
   // podrían sobre-comprometer el mismo presupuesto."
+  // Lectura para el frontend — sin esto no hay forma de ver qué solicitudes están pendientes de
+  // aprobar (UC-ADM-03) ni un historial.
+  async listar(organizationId: string, opciones: { status?: 'pending' | 'approved' | 'rejected' } = {}): Promise<PurchaseRequestRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      if (opciones.status) {
+        const { rows } = await client.query<PurchaseRequestRow>(`select * from purchase_request where status = $1 order by created_at desc`, [opciones.status]);
+        return rows;
+      }
+      const { rows } = await client.query<PurchaseRequestRow>(`select * from purchase_request order by created_at desc`);
+      return rows;
+    });
+  }
+
   private async calcularSaldoDisponible(
     client: PoolClient,
     budgetLineId: string,

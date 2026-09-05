@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard, RequireMfaFor } from '../auth/mfa-required.guard.js';
@@ -6,6 +6,7 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/jwt.types.js';
 import { PurchaseRequestService } from './purchase-request.service.js';
 import { PurchaseApprovalService } from './purchase-approval.service.js';
+import type { PurchaseRequestStatus } from './admin-hub.types.js';
 
 // UC-ADM-02 — Actor: "cualquier rol con permiso de gasto (coach, staff, admin de área)" — a
 // diferencia del resto de Admin Hub, coach también puede capturar una solicitud.
@@ -58,5 +59,10 @@ export class PurchaseRequestController {
       purchaseRequestId: id,
       rejectionReason: body.rejectionReason,
     });
+  }
+
+  @Get()
+  listar(@CurrentUser() actor: AuthenticatedUser, @Query('status') status?: PurchaseRequestStatus) {
+    return this.purchaseRequestService.listar(actor.organizationId, { status });
   }
 }
