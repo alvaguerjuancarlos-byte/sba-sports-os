@@ -90,6 +90,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/calendar/venues" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Sedes
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Attendance/Real-Time</p>
+          <Link href="/attendance/checkins" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Check-ins
+          </Link>
+          <Link href="/attendance/biometric-consent" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Consentimiento biométrico
+          </Link>
         </nav>
         <LogoutButton />
       </aside>
