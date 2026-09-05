@@ -73,13 +73,26 @@ export class UsersService {
       });
 
       const status = requiereConsentimientoTutor ? 'pending' : 'active';
-      const { rows: rolRows } = await client.query<UserTenantRoleRow>(
-        `insert into user_tenant_role (organization_id, user_id, role, status)
-         values ($1, $2, $3, $4)
-         returning *`,
-        [input.organizationId, user.id, input.role, status],
-      );
-      const userTenantRole = rolRows[0];
+      let userTenantRole: UserTenantRoleRow;
+      try {
+        const { rows: rolRows } = await client.query<UserTenantRoleRow>(
+          `insert into user_tenant_role (organization_id, user_id, role, status)
+           values ($1, $2, $3, $4)
+           returning *`,
+          [input.organizationId, user.id, input.role, status],
+        );
+        userTenantRole = rolRows[0];
+      } catch (e) {
+        // Constraint unique(organization_id, user_id, role) — mismo caso que asignarRolAdicional
+        // (UC-ID-02): reutilizar un user existente (4a) puede resolver a un user que YA tiene ese
+        // rol en esta organización en cualquier estado (activo/pendiente/revocado) — encontrado
+        // via verificación end-to-end de UC-CRM-03 (Fase 6), que reintenta la conversión del mismo
+        // prospect con el mismo email tras una falla previa que ya había creado el rol.
+        if (this.esViolacionDeUnicidad(e)) {
+          throw new ConflictException('Este usuario ya tiene ese rol en esta organización.');
+        }
+        throw e;
+      }
 
       let guardianLinkId: string | null = null;
       if (requiereConsentimientoTutor) {

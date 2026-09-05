@@ -15,6 +15,7 @@ import { MatchCenterModule } from './match-center/match-center.module.js';
 import { WeeklyCoachFeedbackModule } from './weekly-coach-feedback/weekly-coach-feedback.module.js';
 import { PerformanceModule } from './performance/performance.module.js';
 import { PlayerCardModule } from './player-card/player-card.module.js';
+import { CrmEnrollmentModule } from './crm-enrollment/crm-enrollment.module.js';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PlayerCardModule } from './player-card/player-card.module.js';
     WeeklyCoachFeedbackModule,
     PerformanceModule,
     PlayerCardModule,
+    CrmEnrollmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

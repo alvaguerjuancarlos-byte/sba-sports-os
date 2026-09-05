@@ -79,6 +79,33 @@ describe('UsersService', () => {
       expect(llamadasInsertUser).toHaveLength(0);
     });
 
+    it('reutilizar un user existente (4a) que YA tiene ese rol en la organización (en cualquier estado) da ConflictException, no un error de BD sin manejar — mismo criterio que asignarRolAdicional (UC-ID-02)', async () => {
+      const existente = { id: 'user-existente', full_name: 'Ana', email: 'ana@example.com', phone: null };
+      const stubs: QueryStub[] = [
+        { matcher: /select \* from "user" where \(/i, rows: [existente] },
+        { matcher: /insert into user_tenant_role/i, rows: [] },
+      ];
+      const client = crearClientFalso(stubs);
+      (client.query as ReturnType<typeof vi.fn>).mockImplementation((sql: string) => {
+        if (/select \* from "user" where \(/i.test(sql)) return Promise.resolve({ rows: [existente] });
+        if (/insert into user_tenant_role/i.test(sql)) return Promise.reject(Object.assign(new Error('duplicate'), { code: '23505' }));
+        throw new Error(`Query sin stub configurado: ${sql}`);
+      });
+      const db = crearDbFalsa(client);
+      const service = new UsersService(db as never, auditLog as never);
+
+      await expect(
+        service.altaUsuarioConRolInicial({
+          organizationId: ORG_ID,
+          actorUserId: ACTOR_ID,
+          fullName: 'Ana',
+          email: 'ana@example.com',
+          dateOfBirth: fechaHaceAnios(30),
+          role: 'coach',
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
     it('un player menor de edad sin guardianUserId no puede darse de alta', async () => {
       const db = crearDbFalsa(crearClientFalso([]));
       const service = new UsersService(db as never, auditLog as never);
