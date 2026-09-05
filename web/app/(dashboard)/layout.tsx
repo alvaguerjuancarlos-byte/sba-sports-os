@@ -73,6 +73,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/payments/collections" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Cobranza
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Sports Hub</p>
+          <Link href="/sports-hub/seasons" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Temporadas
+          </Link>
+          <Link href="/sports-hub/teams" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Equipos y roster
+          </Link>
+          <Link href="/sports-hub/league-cups" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Ligas y copas
+          </Link>
         </nav>
         <LogoutButton />
       </aside>
