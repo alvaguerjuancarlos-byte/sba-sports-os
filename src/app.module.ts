@@ -16,6 +16,7 @@ import { WeeklyCoachFeedbackModule } from './weekly-coach-feedback/weekly-coach-
 import { PerformanceModule } from './performance/performance.module.js';
 import { PlayerCardModule } from './player-card/player-card.module.js';
 import { CrmEnrollmentModule } from './crm-enrollment/crm-enrollment.module.js';
+import { HrCoachHubModule } from './hr-coach-hub/hr-coach-hub.module.js';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { CrmEnrollmentModule } from './crm-enrollment/crm-enrollment.module.js';
     PerformanceModule,
     PlayerCardModule,
     CrmEnrollmentModule,
+    HrCoachHubModule,
   ],
   controllers: [AppController],
   providers: [AppService],

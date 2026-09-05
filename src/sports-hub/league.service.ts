@@ -103,6 +103,16 @@ export class LeagueService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. HR/Coach Hub, UC-HR-05: "resumen de
+  // desarrollo de equipo... agregando resultados de league_standing") — así ese dominio nunca hace
+  // SELECT directo contra league_standing.
+  async consultarStandingsPorEquipo(organizationId: string, teamId: string): Promise<LeagueStandingRow[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<LeagueStandingRow>(`select * from league_standing where team_id = $1`, [teamId]);
+      return rows;
+    });
+  }
+
   private esViolacionDeFk(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23503';
   }
