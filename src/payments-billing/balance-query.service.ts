@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../db/database.service.js';
+import { GuardianConsentService } from '../identity-access/guardian-consent.service.js';
 import type { InvoiceRow, TransactionRow } from './payments-billing.types.js';
 
 export interface ConsultarSaldoInput {
@@ -18,21 +19,26 @@ export interface ConsultarSaldoResultado {
 // UC-PAY-07 — Consultar saldo e historial de facturas. Actor: "Familia (vista propia) o Admin
 // (vista de cualquier cuenta con permiso)".
 //
-// [propuesto, brecha conocida]: "vista propia" se implementa como actorUserId === athleteUserId.
-// No se resuelve si un 'parent' es tutor verificado de este atleta específico — eso requeriría
-// consultar guardian_link (tabla de Identity & Access) y ese dominio no expone hoy un método para
-// "¿es X tutor de Y?". Un padre solo puede consultar el saldo si además tiene rol admin/director;
-// dar acceso a cualquier 'parent' sin verificar el vínculo sería un hueco de seguridad real, así
-// que se prefirió no implementarlo a medias.
+// Brecha cerrada en Fase 6 (Family & Communications, UC-FAM-01: "saldo y facturas" es una de las
+// secciones literales del panel familiar consolidado, que solo tiene sentido para un tutor
+// verificado). Cuando esto se escribió en Fase 2 no existía `GuardianConsentService.esGuardianDe`
+// — ahora sí, así que "vista propia" se amplía a: el propio atleta, un admin/director, O un tutor
+// con guardian_link vigente sobre ESE atleta específico (nunca cualquier 'parent' sin verificar).
 @Injectable()
 export class BalanceQueryService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly guardianConsentService: GuardianConsentService,
+  ) {}
 
   async consultar(input: ConsultarSaldoInput): Promise<ConsultarSaldoResultado> {
     const esVistaPropia = input.actorUserId === input.athleteUserId;
     const esStaffConPermiso = input.actorRoles.some((role) => role === 'admin' || role === 'director');
-    if (!esVistaPropia && !esStaffConPermiso) {
-      throw new ForbiddenException('Solo la propia cuenta o un admin/director pueden consultar este saldo.');
+    const esTutorVerificado = esVistaPropia
+      ? false
+      : await this.guardianConsentService.esGuardianDe(input.organizationId, input.actorUserId, input.athleteUserId);
+    if (!esVistaPropia && !esStaffConPermiso && !esTutorVerificado) {
+      throw new ForbiddenException('Solo la propia cuenta, un tutor con guardian_link vigente, o un admin/director pueden consultar este saldo.');
     }
 
     return this.db.withTenant(input.organizationId, async (client) => {

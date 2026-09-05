@@ -17,6 +17,7 @@ import { PerformanceModule } from './performance/performance.module.js';
 import { PlayerCardModule } from './player-card/player-card.module.js';
 import { CrmEnrollmentModule } from './crm-enrollment/crm-enrollment.module.js';
 import { HrCoachHubModule } from './hr-coach-hub/hr-coach-hub.module.js';
+import { FamilyCommunicationsModule } from './family-communications/family-communications.module.js';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { HrCoachHubModule } from './hr-coach-hub/hr-coach-hub.module.js';
     PlayerCardModule,
     CrmEnrollmentModule,
     HrCoachHubModule,
+    FamilyCommunicationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

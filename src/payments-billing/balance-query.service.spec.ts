@@ -7,13 +7,17 @@ import { crearDbFalsa } from './test-helpers.js';
 const ORG_ID = 'org-1';
 const ATHLETE_ID = 'atleta-1';
 
+function guardianConsentServiceFalso(esGuardian = false) {
+  return { esGuardianDe: vi.fn().mockResolvedValue(esGuardian) };
+}
+
 // UC-PAY-07 — un test por criterio de aceptación textual.
 describe('BalanceQueryService', () => {
   it('el propio atleta puede consultar su saldo', async () => {
     const query = vi.fn().mockResolvedValue({ rows: [] });
     const client = { query } as unknown as PoolClient;
     const db = crearDbFalsa(client);
-    const service = new BalanceQueryService(db as never);
+    const service = new BalanceQueryService(db as never, guardianConsentServiceFalso() as never);
 
     const resultado = await service.consultar({ organizationId: ORG_ID, actorUserId: ATHLETE_ID, actorRoles: ['player'], athleteUserId: ATHLETE_ID });
 
@@ -24,7 +28,7 @@ describe('BalanceQueryService', () => {
     const query = vi.fn().mockResolvedValue({ rows: [] });
     const client = { query } as unknown as PoolClient;
     const db = crearDbFalsa(client);
-    const service = new BalanceQueryService(db as never);
+    const service = new BalanceQueryService(db as never, guardianConsentServiceFalso() as never);
 
     await expect(
       service.consultar({ organizationId: ORG_ID, actorUserId: 'admin-1', actorRoles: ['admin'], athleteUserId: ATHLETE_ID }),
@@ -33,11 +37,22 @@ describe('BalanceQueryService', () => {
 
   it('un tercero sin rol admin/director no puede consultar el saldo de otro atleta', async () => {
     const db = crearDbFalsa({ query: vi.fn() } as never);
-    const service = new BalanceQueryService(db as never);
+    const service = new BalanceQueryService(db as never, guardianConsentServiceFalso(false) as never);
 
     await expect(
       service.consultar({ organizationId: ORG_ID, actorUserId: 'otro-atleta', actorRoles: ['player'], athleteUserId: ATHLETE_ID }),
     ).rejects.toThrow(ForbiddenException);
+  });
+
+  it('un tutor con guardian_link vigente puede consultar el saldo de su hijo (brecha cerrada en Fase 6, UC-FAM-01)', async () => {
+    const query = vi.fn().mockResolvedValue({ rows: [] });
+    const client = { query } as unknown as PoolClient;
+    const db = crearDbFalsa(client);
+    const service = new BalanceQueryService(db as never, guardianConsentServiceFalso(true) as never);
+
+    await expect(
+      service.consultar({ organizationId: ORG_ID, actorUserId: 'tutor-1', actorRoles: ['parent'], athleteUserId: ATHLETE_ID }),
+    ).resolves.toBeDefined();
   });
 
   it('el saldo actual suma solo las invoices pending, no las pagadas', async () => {
@@ -56,7 +71,7 @@ describe('BalanceQueryService', () => {
     });
     const client = { query } as unknown as PoolClient;
     const db = crearDbFalsa(client);
-    const service = new BalanceQueryService(db as never);
+    const service = new BalanceQueryService(db as never, guardianConsentServiceFalso() as never);
 
     const resultado = await service.consultar({ organizationId: ORG_ID, actorUserId: ATHLETE_ID, actorRoles: ['player'], athleteUserId: ATHLETE_ID });
 
@@ -67,7 +82,7 @@ describe('BalanceQueryService', () => {
     const query = vi.fn().mockResolvedValue({ rows: [] });
     const client = { query } as unknown as PoolClient;
     const db = crearDbFalsa(client);
-    const service = new BalanceQueryService(db as never);
+    const service = new BalanceQueryService(db as never, guardianConsentServiceFalso() as never);
 
     const resultado = await service.consultar({ organizationId: ORG_ID, actorUserId: ATHLETE_ID, actorRoles: ['player'], athleteUserId: ATHLETE_ID });
 

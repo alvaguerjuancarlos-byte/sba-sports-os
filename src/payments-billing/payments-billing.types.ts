@@ -50,12 +50,16 @@ export interface TransactionRow {
   created_at: string;
 }
 
+// `notification_type`/`status` se agregaron en la migración 0016 (Family & Communications,
+// Fase 6) — ver esa migración para el porqué se extendió esta tabla en vez de crear una paralela.
 export interface NotificationLogRow {
   id: string;
   organization_id: string;
   invoice_id: string | null;
   recipient_user_id: string;
   channel: string;
+  notification_type: string;
+  status: 'unread' | 'read' | 'dismissed';
   sent_at: string;
 }
 
