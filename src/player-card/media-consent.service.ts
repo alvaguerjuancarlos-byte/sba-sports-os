@@ -99,6 +99,14 @@ export class MediaConsentService {
     });
   }
 
+  // Lectura para el frontend — saber si mostrar "otorgar" o "revocar" sin adivinar el estado.
+  async obtenerEstado(organizationId: string, userId: string): Promise<MediaConsentRow | null> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<MediaConsentRow>(`select * from media_consent where user_id = $1`, [userId]);
+      return rows[0] ?? null;
+    });
+  }
+
   // Lectura para GalleryService (UC-PLC-03): "requiere consentimiento de medios capturado
   // previamente" — nunca se infiere granted por ausencia de fila.
   async tieneConsentimientoVigente(organizationId: string, userId: string): Promise<boolean> {

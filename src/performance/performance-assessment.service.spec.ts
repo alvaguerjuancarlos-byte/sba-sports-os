@@ -31,4 +31,14 @@ describe('PerformanceAssessmentService', () => {
 
     expect(resultado).toHaveLength(1);
   });
+
+  it('lista todas las evaluaciones de un jugador', async () => {
+    const stubs: QueryStub[] = [{ matcher: /select \* from performance_assessment where player_id = \$1 order by assessment_date/i, rows: [{ id: 'pa-1' }] }];
+    const db = crearDbFalsa(crearClientFalso(stubs));
+    const service = new PerformanceAssessmentService(db as never, crearAuditLogFalso() as never);
+
+    const resultado = await service.listarPorJugador(ORG_ID, PLAYER_ID);
+
+    expect(resultado).toHaveLength(1);
+  });
 });

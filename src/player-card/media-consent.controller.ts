@@ -1,4 +1,4 @@
-import { Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/jwt.types.js';
@@ -18,5 +18,10 @@ export class MediaConsentController {
   @Post('revoke')
   revocar(@CurrentUser() actor: AuthenticatedUser, @Param('userId') userId: string) {
     return this.service.revocar({ organizationId: actor.organizationId, actorUserId: actor.userId, userId });
+  }
+
+  @Get()
+  obtenerEstado(@CurrentUser() actor: AuthenticatedUser, @Param('userId') userId: string) {
+    return this.service.obtenerEstado(actor.organizationId, userId);
   }
 }

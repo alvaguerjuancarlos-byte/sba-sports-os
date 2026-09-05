@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RolesGuard, Roles } from '../auth/roles.guard.js';
 import { MfaRequiredGuard } from '../auth/mfa-required.guard.js';
@@ -28,5 +28,12 @@ export class PerformanceAssessmentController {
       score: body.score,
       notes: body.notes ?? null,
     });
+  }
+
+  // Lectura para el frontend — histórico de evaluaciones capturadas de un jugador (insumo crudo
+  // detrás de la dimensión "desempeño" del Development Map).
+  @Get(':playerId')
+  listar(@Param('playerId') playerId: string, @CurrentUser() actor: AuthenticatedUser) {
+    return this.service.listarPorJugador(actor.organizationId, playerId);
   }
 }

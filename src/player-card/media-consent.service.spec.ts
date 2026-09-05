@@ -66,4 +66,21 @@ describe('MediaConsentService', () => {
 
     await expect(service.tieneConsentimientoVigente(ORG_ID, ADULT_ID)).resolves.toBe(false);
   });
+
+  describe('obtenerEstado', () => {
+    it('regresa null si nunca se ha gestionado consentimiento', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from media_consent where user_id/i, rows: [] }]));
+      const service = new MediaConsentService(db as never, crearAuditLogFalso() as never, usersServiceFalso({}) as never, guardianServiceFalso(false) as never);
+
+      await expect(service.obtenerEstado(ORG_ID, ADULT_ID)).resolves.toBeNull();
+    });
+
+    it('regresa el registro existente', async () => {
+      const existente = { id: 'mc-1', consent_status: 'granted' };
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select \* from media_consent where user_id/i, rows: [existente] }]));
+      const service = new MediaConsentService(db as never, crearAuditLogFalso() as never, usersServiceFalso({}) as never, guardianServiceFalso(false) as never);
+
+      await expect(service.obtenerEstado(ORG_ID, ADULT_ID)).resolves.toMatchObject({ consent_status: 'granted' });
+    });
+  });
 });

@@ -33,7 +33,11 @@ export class WeeklyFeedbackQuestionConfigController {
     return this.service.archivar({ organizationId: actor.organizationId, actorUserId: actor.userId, configId });
   }
 
+  // Lectura abierta también a coach — UC-WCF-01 paso 2: coach necesita ver las 3 preguntas
+  // configuradas para el deporte de su equipo al momento de capturar el feedback semanal, aunque
+  // solo admin/director pueda crear/archivar la configuración.
   @Get()
+  @Roles('admin', 'director', 'coach')
   listar(@CurrentUser() actor: AuthenticatedUser) {
     return this.service.listar(actor.organizationId);
   }
