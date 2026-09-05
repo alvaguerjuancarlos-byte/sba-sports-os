@@ -118,6 +118,33 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/match-center" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Partidos
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Weekly Coach Feedback</p>
+          <Link href="/weekly-feedback/capture" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Captura semanal
+          </Link>
+          <Link href="/weekly-feedback/history" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Histórico
+          </Link>
+          <Link href="/weekly-feedback/question-configs" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Preguntas por deporte
+          </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Performance</p>
+          <Link href="/performance/assessments" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Evaluaciones
+          </Link>
+          <Link href="/performance/development-maps" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Development Map
+          </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Player Card</p>
+          <Link href="/player-card" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Tarjetas
+          </Link>
+          <Link href="/player-card/media-consent" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Consentimiento de medios
+          </Link>
+          <Link href="/player-card/gallery" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Galería
+          </Link>
         </nav>
         <LogoutButton />
       </aside>

@@ -26,5 +26,8 @@ export const config = {
     '/facilities/:path*',
     '/callup-engine/:path*',
     '/match-center/:path*',
+    '/weekly-feedback/:path*',
+    '/performance/:path*',
+    '/player-card/:path*',
   ],
 };
