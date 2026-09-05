@@ -203,4 +203,12 @@ export class UsersService {
       return rows.length > 0;
     });
   }
+
+  // "user" es global, sin RLS (arquitectura §3.4) — no necesita withTenant. Lectura para
+  // consumidores de otros dominios (ej. Calendar & RSVP, UC-CAL-03: necesita date_of_birth para
+  // saber si quien debe responder un RSVP es menor de edad) que nunca deben leer esta tabla directo.
+  async obtenerPorId(userId: string): Promise<UserRow | null> {
+    const { rows } = await this.db.query(`select * from "user" where id = $1`, [userId]);
+    return (rows[0] as unknown as UserRow | undefined) ?? null;
+  }
 }

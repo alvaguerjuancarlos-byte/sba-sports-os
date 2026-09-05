@@ -112,4 +112,31 @@ describe('GuardianConsentService', () => {
       expect(llamadasActivarRol).toHaveLength(0);
     });
   });
+
+  describe('esGuardianDe', () => {
+    it('regresa true si existe el vínculo guardian_link', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select 1 from guardian_link/i, rows: [{ '?column?': 1 }] }]));
+      const service = new GuardianConsentService(db as never, auditLog as never);
+
+      await expect(service.esGuardianDe(ORG_ID, 'tutor-1', 'atleta-1')).resolves.toBe(true);
+    });
+
+    it('regresa false si no existe el vínculo — usado por Calendar & RSVP (UC-CAL-03) para bloquear un RSVP de menor sin tutor', async () => {
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /select 1 from guardian_link/i, rows: [] }]));
+      const service = new GuardianConsentService(db as never, auditLog as never);
+
+      await expect(service.esGuardianDe(ORG_ID, 'no-es-tutor', 'atleta-1')).resolves.toBe(false);
+    });
+  });
+
+  describe('listarAtletasDeGuardian', () => {
+    it('regresa los ids de atleta únicos vinculados a ese tutor', async () => {
+      const db = crearDbFalsa(
+        crearClientFalso([{ matcher: /select distinct athlete_user_id from guardian_link/i, rows: [{ athlete_user_id: 'atleta-1' }, { athlete_user_id: 'atleta-2' }] }]),
+      );
+      const service = new GuardianConsentService(db as never, auditLog as never);
+
+      await expect(service.listarAtletasDeGuardian(ORG_ID, 'tutor-1')).resolves.toEqual(['atleta-1', 'atleta-2']);
+    });
+  });
 });

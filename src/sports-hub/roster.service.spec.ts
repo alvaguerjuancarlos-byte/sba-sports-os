@@ -127,4 +127,24 @@ describe('RosterService', () => {
       expect(llamadasDelete).toHaveLength(0);
     });
   });
+
+  describe('listarEquiposDeUsuario', () => {
+    it('regresa los ids de equipo activos de un usuario, filtrando por rol si se pide', async () => {
+      const db = crearDbFalsa(
+        crearClientFalso([{ matcher: /select distinct team_id from roster_membership where user_id = \$1 and status = 'active' and role/i, rows: [{ team_id: 'team-A' }] }]),
+      );
+      const service = new RosterService(db as never, auditLog as never, usersServiceFalso(true) as never, teamServiceFalso(null) as never);
+
+      await expect(service.listarEquiposDeUsuario(ORG_ID, USER_ID, { role: 'coach' })).resolves.toEqual(['team-A']);
+    });
+
+    it('sin filtro de rol, regresa todos los equipos activos del usuario — usado por Calendar & RSVP (UC-CAL-04)', async () => {
+      const db = crearDbFalsa(
+        crearClientFalso([{ matcher: /select distinct team_id from roster_membership where user_id = \$1 and status = 'active'$/i, rows: [{ team_id: 'team-A' }, { team_id: 'team-B' }] }]),
+      );
+      const service = new RosterService(db as never, auditLog as never, usersServiceFalso(true) as never, teamServiceFalso(null) as never);
+
+      await expect(service.listarEquiposDeUsuario(ORG_ID, USER_ID)).resolves.toEqual(['team-A', 'team-B']);
+    });
+  });
 });

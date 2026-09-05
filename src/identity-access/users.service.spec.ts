@@ -267,4 +267,25 @@ describe('UsersService', () => {
       await expect(service.tieneRolActivoEnOrganizacion(ORG_ID, 'user-1')).resolves.toBe(false);
     });
   });
+
+  describe('obtenerPorId', () => {
+    it('regresa el usuario si existe — "user" es global, no usa withTenant', async () => {
+      const db = crearDbFalsa(crearClientFalso([]));
+      (db.query as ReturnType<typeof vi.fn>).mockResolvedValue({ rows: [{ id: 'user-1', date_of_birth: '2015-01-01' }] });
+      const service = new UsersService(db as never, auditLog as never);
+
+      const resultado = await service.obtenerPorId('user-1');
+
+      expect(resultado?.id).toBe('user-1');
+      expect(db.withTenant).not.toHaveBeenCalled();
+    });
+
+    it('regresa null si no existe — usado por Calendar & RSVP (UC-CAL-03) para decidir sin lanzar', async () => {
+      const db = crearDbFalsa(crearClientFalso([]));
+      (db.query as ReturnType<typeof vi.fn>).mockResolvedValue({ rows: [] });
+      const service = new UsersService(db as never, auditLog as never);
+
+      await expect(service.obtenerPorId('no-existe')).resolves.toBeNull();
+    });
+  });
 });

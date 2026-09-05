@@ -7,9 +7,18 @@ import { ConfigurationStudioModule } from './configuration-studio/configuration-
 import { AdminHubModule } from './admin-hub/admin-hub.module.js';
 import { PaymentsBillingModule } from './payments-billing/payments-billing.module.js';
 import { SportsHubModule } from './sports-hub/sports-hub.module.js';
+import { CalendarRsvpModule } from './calendar-rsvp/calendar-rsvp.module.js';
 
 @Module({
-  imports: [DatabaseModule, IdentityAccessModule, ConfigurationStudioModule, AdminHubModule, PaymentsBillingModule, SportsHubModule],
+  imports: [
+    DatabaseModule,
+    IdentityAccessModule,
+    ConfigurationStudioModule,
+    AdminHubModule,
+    PaymentsBillingModule,
+    SportsHubModule,
+    CalendarRsvpModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

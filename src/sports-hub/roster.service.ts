@@ -145,6 +145,26 @@ export class RosterService {
     });
   }
 
+  // Lectura para consumidores de otros dominios (ej. Calendar & RSVP, UC-CAL-04: "coach ve los
+  // eventos de su(s) equipo(s)") — así ese dominio nunca hace SELECT directo contra
+  // roster_membership, siempre vía este servicio.
+  async listarEquiposDeUsuario(organizationId: string, userId: string, opciones: { role?: RosterRole } = {}): Promise<string[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      if (opciones.role) {
+        const { rows } = await client.query<{ team_id: string }>(
+          `select distinct team_id from roster_membership where user_id = $1 and status = 'active' and role = $2`,
+          [userId, opciones.role],
+        );
+        return rows.map((r) => r.team_id);
+      }
+      const { rows } = await client.query<{ team_id: string }>(
+        `select distinct team_id from roster_membership where user_id = $1 and status = 'active'`,
+        [userId],
+      );
+      return rows.map((r) => r.team_id);
+    });
+  }
+
   private esViolacionDeUnicidad(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23505';
   }

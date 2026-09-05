@@ -104,4 +104,28 @@ export class GuardianConsentService {
       return updated[0];
     });
   }
+
+  // Lecturas para consumidores de otros dominios (ej. Calendar & RSVP, UC-CAL-03: "la invitación
+  // llega al tutor vía guardian_link") — el vínculo guardián-atleta existe independientemente del
+  // consent_status de datos biométricos/generales; aquí se usa solo para saber quién es tutor de
+  // quién, nunca para inferir que el consentimiento (de otro flujo) está otorgado.
+  async esGuardianDe(organizationId: string, guardianUserId: string, athleteUserId: string): Promise<boolean> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query(
+        `select 1 from guardian_link where guardian_user_id = $1 and athlete_user_id = $2 limit 1`,
+        [guardianUserId, athleteUserId],
+      );
+      return rows.length > 0;
+    });
+  }
+
+  async listarAtletasDeGuardian(organizationId: string, guardianUserId: string): Promise<string[]> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<{ athlete_user_id: string }>(
+        `select distinct athlete_user_id from guardian_link where guardian_user_id = $1`,
+        [guardianUserId],
+      );
+      return rows.map((r) => r.athlete_user_id);
+    });
+  }
 }
