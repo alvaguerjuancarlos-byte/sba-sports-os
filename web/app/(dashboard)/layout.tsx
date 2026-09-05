@@ -97,6 +97,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/attendance/biometric-consent" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Consentimiento biométrico
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Facilities & Inventory</p>
+          <Link href="/facilities/items" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Material
+          </Link>
+          <Link href="/facilities/checkouts" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Check-outs
+          </Link>
+          <Link href="/facilities/availability" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Disponibilidad
+          </Link>
         </nav>
         <LogoutButton />
       </aside>
