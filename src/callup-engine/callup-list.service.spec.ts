@@ -204,4 +204,42 @@ describe('CallupListService', () => {
       ConflictException,
     );
   });
+
+  describe('obtenerSlotConfirmado', () => {
+    it('regresa null si el slot no existe, no pertenece a ese evento, o no está aceptado — usado por Match Center (UC-MAT-01)', async () => {
+      const auditLog = crearAuditLogFalso();
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /join callup_list cl on cl\.id = cs\.callup_list_id/i, rows: [] }]));
+      const service = new CallupListService(
+        db as never,
+        auditLog as never,
+        eventServiceFalso(null) as never,
+        teamServiceFalso(null) as never,
+        rosterServiceFalso([]) as never,
+        eligibilityServiceFalso(new Set()) as never,
+        callupFormatRuleServiceFalso(null) as never,
+        callupPriorityServiceFalso() as never,
+      );
+
+      await expect(service.obtenerSlotConfirmado(ORG_ID, EVENT_ID, 'slot-no-confirmado')).resolves.toBeNull();
+    });
+
+    it('regresa el slot si está aceptado y pertenece a la convocatoria de ese evento', async () => {
+      const auditLog = crearAuditLogFalso();
+      const db = crearDbFalsa(crearClientFalso([{ matcher: /join callup_list cl on cl\.id = cs\.callup_list_id/i, rows: [{ id: 'slot-1', user_id: 'jugador-1', status: 'accepted' }] }]));
+      const service = new CallupListService(
+        db as never,
+        auditLog as never,
+        eventServiceFalso(null) as never,
+        teamServiceFalso(null) as never,
+        rosterServiceFalso([]) as never,
+        eligibilityServiceFalso(new Set()) as never,
+        callupFormatRuleServiceFalso(null) as never,
+        callupPriorityServiceFalso() as never,
+      );
+
+      const resultado = await service.obtenerSlotConfirmado(ORG_ID, EVENT_ID, 'slot-1');
+
+      expect(resultado?.user_id).toBe('jugador-1');
+    });
+  });
 });

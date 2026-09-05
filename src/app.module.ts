@@ -11,6 +11,7 @@ import { CalendarRsvpModule } from './calendar-rsvp/calendar-rsvp.module.js';
 import { AttendanceRealtimeModule } from './attendance-realtime/attendance-realtime.module.js';
 import { FacilitiesInventoryModule } from './facilities-inventory/facilities-inventory.module.js';
 import { CallupEngineModule } from './callup-engine/callup-engine.module.js';
+import { MatchCenterModule } from './match-center/match-center.module.js';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CallupEngineModule } from './callup-engine/callup-engine.module.js';
     AttendanceRealtimeModule,
     FacilitiesInventoryModule,
     CallupEngineModule,
+    MatchCenterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

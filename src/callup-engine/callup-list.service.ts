@@ -127,6 +127,22 @@ export class CallupListService {
     return resultado;
   }
 
+  // Lectura para consumidores de otros dominios (ej. Match Center, UC-MAT-01: "solo se puede
+  // alinear a quien pasó por Call-up Engine" — la convocatoria debe estar cerrada y el jugador
+  // haber aceptado) — así ese dominio nunca hace SELECT directo contra callup_slot/callup_list.
+  async obtenerSlotConfirmado(organizationId: string, eventId: string, callupSlotId: string): Promise<CallupSlotRow | null> {
+    return this.db.withTenant(organizationId, async (client) => {
+      const { rows } = await client.query<CallupSlotRow>(
+        `select cs.*
+         from callup_slot cs
+         join callup_list cl on cl.id = cs.callup_list_id
+         where cs.id = $1 and cl.event_id = $2 and cs.status = 'accepted'`,
+        [callupSlotId, eventId],
+      );
+      return rows[0] ?? null;
+    });
+  }
+
   private esViolacionDeUnicidad(e: unknown): boolean {
     return typeof e === 'object' && e !== null && (e as { code?: string }).code === '23505';
   }
