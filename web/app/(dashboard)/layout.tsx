@@ -35,6 +35,25 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/config/audit-log" className="rounded px-2 py-1.5 hover:bg-neutral-100">
             Auditoría
           </Link>
+          <p className="mt-3 px-2 text-xs font-semibold tracking-wide text-neutral-400 uppercase">Admin Hub</p>
+          <Link href="/admin-hub/vendors" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Proveedores
+          </Link>
+          <Link href="/admin-hub/budget-lines" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Budget lines
+          </Link>
+          <Link href="/admin-hub/purchase-requests" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Solicitudes de compra
+          </Link>
+          <Link href="/admin-hub/purchase-orders" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Órdenes de compra
+          </Link>
+          <Link href="/admin-hub/actual-postings" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Gasto real
+          </Link>
+          <Link href="/admin-hub/budget-report" className="rounded px-2 py-1.5 hover:bg-neutral-100">
+            Presupuesto vs. real
+          </Link>
         </nav>
         <LogoutButton />
       </aside>
